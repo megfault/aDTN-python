@@ -1,4 +1,4 @@
-import nacl.secret
+from nacl.secret import *
 import nacl.utils
 import nacl.hash
 import nacl.encoding
@@ -20,6 +20,19 @@ MAX_INNER_SIZE = 1466
 WIRELESS_IFACE = "wlp3s0"
 
 
+def encrypt(message, key, nonce):
+    box = SecretBox(key)
+    encrypted = box.encrypt(message, key)
+    return encrypted.ciphertext
+
+def decrypt(ciphertext, key):
+    box = SecretBox(key)
+    plaintext = box.decrypt(ciphertext)
+    return plaintext
+
+def generate_iv():
+    return nacl.utils.random(nacl.secret.SecretBox.NONCE_SIZE)
+
 class aDTN():
     def __init__(self, batch_size, sending_freq, creation_rate, name):
         self.batch_size = batch_size
@@ -37,13 +50,13 @@ class aDTN():
             to_send = self.ms.get_messages(self.batch_size)
             for message in to_send:
                 for key_id in self.km.keys:
-                    iv = nacl.utils.random(nacl.secret.SecretBox.NONCE_SIZE)
+                    iv = generate_iv()
                     key = self.km.keys[key_id]
                     pkt = (aDTNPacket(init_vector=iv)/aDTNInnerPacket()/message)
                     self.sending_pool.append(pkt)
             while len(self.sending_pool) < self.batch_size:
                 fake_key = self.km.get_fake_key()
-                iv = nacl.utils.random(nacl.secret.SecretBox.NONCE_SIZE)
+                iv = generate_iv()
                 self.sending_pool.append((aDTNPacket(init_vector=iv)/aDTNInnerPacket())) #TODO: pass fake_key to aDTNPacket
 
     def send(self):
