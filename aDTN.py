@@ -132,18 +132,20 @@ class KeyManager():
 
 class aDTNPacket(Packet):
 
-    def __init__(self, key, *args, nonce=None, encrypt=True, **kwargs):
+    def __init__(self, *args, key=None, nonce=None, encrypt=True, **kwargs):
         self.key = key
         super().__init__(*args, **kwargs)
 
-    def encrypt(self, key):
-        byteval = self.payload.load
+    def encrypt(self):
+        key = self.key
+        byteval = self.payload.build() # better way to do it?
         encrypted = encrypt(byteval, key)
         self.remove_payload()
         # add_payload will try to figure out the type
         self.add_payload(encrypted)
 
-    def decrypt(self, key):
+    def decrypt(self):
+        key = self.key
         byteval = self.payload.load
         decrypted = decrypt(byteval, key)
         self.remove_payload()
@@ -154,16 +156,15 @@ class aDTNPacket(Packet):
 
 class aDTNInnerPacket(Packet):
     packet_len = 1468  # TODO get it from layer above, conf.padding_layer
-    name = "aDTNInnerPacket"
     fields_desc = [LenField("len", default=None)]
     # TODO configure payload type as EncryptedMessage
-
 
     def post_build(self, pkt, pay):
         # add padding, will be calculated when calling show2
         # which basically builds and dissects the same packet
         pad_len = self.packet_len - len(pkt)
-        return pkt + b'0' * pad_len
+        print(pkt)
+        return pkt + pay + b'0' * pad_len
 
     def extract_padding(self, s):
         l = self.len
