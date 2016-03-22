@@ -1,5 +1,5 @@
 from nacl.secret import *
-import nacl.utils
+from nacl.utils import random as rand
 import nacl.hash
 import nacl.encoding
 import struct
@@ -8,7 +8,6 @@ import binascii
 from scapy.all import *
 import sqlite3
 import time
-import random
 import sched
 import threading
 
@@ -19,19 +18,15 @@ PACKET_SIZE = 1500
 MAX_INNER_SIZE = 1466
 WIRELESS_IFACE = "wlp3s0"
 
-
-def encrypt(message, key, nonce):
-    box = SecretBox(key)
-    encrypted = box.encrypt(message, key)
-    return encrypted.ciphertext
-
-def decrypt(ciphertext, key):
-    box = SecretBox(key)
-    plaintext = box.decrypt(ciphertext)
-    return plaintext
-
 def generate_iv():
-    return nacl.utils.random(nacl.secret.SecretBox.NONCE_SIZE)
+    return rand(SecretBox.NONCE_SIZE)
+
+def encrypt(message, key, nonce_generator=generate_iv):
+    return SecretBox(key).encrypt(message, nonce_generator())
+
+def decrypt(encrypted, key):
+    return SecretBox(key).decrypt(encrypted)
+
 
 class aDTN():
     def __init__(self, batch_size, sending_freq, creation_rate, name):
