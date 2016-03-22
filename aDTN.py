@@ -131,14 +131,33 @@ class KeyManager():
 
 
 class aDTNPacket(Packet):
-    name = "aDTNPacket"
-    fields_desc = [BitField("init_vector", None, 128)]  # 16 bytes
-                 # BitField("encrypted", None, 11744 + 128)]  # 1468+16 byte authenticator from encrypting
+
+    def __init__(self, key, *args, nonce=None, encrypt=True, **kwargs):
+        self.key = key
+        super().__init__(*args, **kwargs)
+
+    def encrypt(self, key):
+        byteval = self.payload.load
+        encrypted = encrypt(byteval, key)
+        self.remove_payload()
+        # add_payload will try to figure out the type
+        self.add_payload(encrypted)
+
+    def decrypt(self, key):
+        byteval = self.payload.load
+        decrypted = decrypt(byteval, key)
+        self.remove_payload()
+        # add_payload will try to figure out the type
+        # encrypted is of Type nacl.secret.EncryptedMessage
+        self.add_payload(aDTNInnerPacket(decypted))
+
 
 class aDTNInnerPacket(Packet):
-    packet_len = 1500
+    packet_len = 1468  # TODO get it from layer above, conf.padding_layer
     name = "aDTNInnerPacket"
     fields_desc = [LenField("len", default=None)]
+    # TODO configure payload type as EncryptedMessage
+
 
     def post_build(self, pkt, pay):
         # add padding, will be calculated when calling show2
@@ -149,6 +168,7 @@ class aDTNInnerPacket(Packet):
     def extract_padding(self, s):
         l = self.len
         return s[:l], s[l:]
+
 
 class MessageStore():
     def __init__(self, size_threshold=None):
