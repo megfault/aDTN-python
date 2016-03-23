@@ -10,6 +10,8 @@ import sqlite3
 import time
 import sched
 import threading
+import random
+import math
 
 DEFAULT_DIR = ".sloth/"
 KEYS_DIR = "adtn/keys/"
@@ -18,11 +20,14 @@ PACKET_SIZE = 1500
 MAX_INNER_SIZE = 1466
 WIRELESS_IFACE = "wlp3s0"
 
+
 def generate_iv():
     return rand(SecretBox.NONCE_SIZE)
 
+
 def encrypt(message, key, nonce_generator=generate_iv):
     return SecretBox(key).encrypt(message, nonce_generator())
+
 
 def decrypt(encrypted, key):
     return SecretBox(key).decrypt(encrypted)
@@ -39,6 +44,9 @@ class aDTN():
         self.sending_pool = []
         self.prepare_sending_pool()
         self.next_message = 0
+        self.scheduler = sched.scheduler(time.time, time.sleep)
+        self.scheduler.enter(self.get_interval(), self.write_message)
+        self.scheduler.enter(self.sending_freq, 1, self.send)
 
     def prepare_sending_pool(self):
         if len(self.sending_pool) < 2 * self.batch_size:
@@ -46,18 +54,20 @@ class aDTN():
             for message in to_send:
                 for key_id in self.km.keys:
                     key = self.km.keys[key_id]
-                    pkt = (aDTNPacket(key=key)/aDTNInnerPacket()/message)
+                    pkt = (aDTNPacket(key=key) / aDTNInnerPacket() / message)
                     self.sending_pool.append(pkt)
             while len(self.sending_pool) < self.batch_size:
                 fake_key = self.km.get_fake_key()
-                self.sending_pool.append((aDTNPacket(key=fake_key)/aDTNInnerPacket()))
+                self.sending_pool.append((aDTNPacket(key=fake_key) / aDTNInnerPacket()))
 
     def send(self):
+        self.scheduler.enter(self.sending_freq, 1, self.send)
         batch = []
         sample = random.sample(self.sending_pool, self.batch_size)
         for pkt in sample:
             batch.append(Ether(dst="ff:ff:ff:ff:ff:ff", type="0xcafe") / pkt)
             self.sending_pool.remove(pkt)
+            pkt.show()
         sendp(batch, iface=WIRELESS_IFACE)
         self.prepare_sending_pool()
 
@@ -66,19 +76,21 @@ class aDTN():
         for key in self.km.keys:
             pass
             # attempt to dissect packet
-            #if it works, break and add message to self.ms
+            # if it works, break and add message to self.ms
+
+    def get_interval(self):
+        return  abs(random.gauss(self.creation_rate, self.creation_rate/4))
 
     def write_message(self):
+        self.scheduler.enter(self.get_interval(), 1, self.write_message)
         self.ms.add_message(self.name + str(self.next_message))
         self.next_message += 1
 
     def run(self):
-        s = sched.scheduler(time.time, time.sleep)
-        s.enter(self.sending_freq, 1, self.send)
-        s.enter(-math.log(1.0 - random.random()) / self.creation_rate, 2, self.write_message)
-        t_rcv = threading.Thread(target=s.run, kwargs={"blocking": True})
+        t_rcv = threading.Thread(target=self.scheduler.run, kwargs={"blocking": True})
         t_rcv.run()
-        t_snd = threading.Thread(target=sniff, kwargs={"prn": lambda p: self.process(p), "filter": "ether proto 0xcafe"})
+        t_snd = threading.Thread(target=sniff,
+                                 kwargs={"prn": lambda p: self.process(p), "filter": "ether proto 0xcafe"})
         t_snd.run()
         threading.Thread()
 
@@ -125,7 +137,6 @@ class KeyManager():
 
 
 class aDTNPacket(Packet):
-
     def __init__(self, *args, key=None, nonce=None, auto_encrypt=True, **kwargs):
         self.key = key
         self.auto_encrypt = auto_encrypt
@@ -133,7 +144,7 @@ class aDTNPacket(Packet):
 
     def encrypt(self):
         key = self.key
-        byteval = self.payload.build() # better way to do it?
+        byteval = self.payload.build()  # better way to do it?
         encrypted = encrypt(byteval, key)
         self.remove_payload()
         # add_payload will try to figure out the type
@@ -176,6 +187,7 @@ class aDTNPacket(Packet):
     def copy(self):
         pkt = super().copy()
         return self.clone_attrs(pkt)
+
 
 class aDTNInnerPacket(Packet):
     packet_len = 1460  # TODO get it from layer above, conf.padding_layer
@@ -267,7 +279,7 @@ class MessageStore():
 if __name__ == "__main__":
     batch_size = 10
     sending_freq = 30
-    creation_rate = 4 * 3600
+    creation_rate = 4 * 3600 / 3600 / 4
     device_name = "maxwell"
     bind_layers(aDTNPacket, aDTNInnerPacket)
     bind_layers(Ether, aDTNPacket, type="0xcafe")
