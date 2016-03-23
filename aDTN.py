@@ -148,8 +148,24 @@ class aDTNPacket(Packet):
         # encrypted is of Type nacl.secret.EncryptedMessage
         self.add_payload(aDTNInnerPacket(decrypted))
 
+    # TODO delegate to encrypt/decrypt after building
+    # TODO also breaks show2 and other methods where build is called twice
+    def post_build(self, pkt, pay):
+        return encrypt(pay, self.key)
+
+    # TODO misuse of method, find the right one
+    def extract_padding(self, s):
+        return decrypt(s, self.key), None
+
     def copy(self):
         clone = super().copy()
+        clone.key = self.key
+        return clone
+
+    # TODO how to avoid such redundancy
+    # scapy seems to have a oop structure problem
+    def clone_with(self, payload=None, **kargs):
+        clone = super().clone_with(payload, **kargs)
         clone.key = self.key
         return clone
 
@@ -174,6 +190,8 @@ class aDTNInnerPacket(Packet):
             raise ValueError("Payload in inner packet too big")
         return s[:l], s[l:]
 
+
+bind_layers( aDTNPacket, aDTNInnerPacket)
 
 class MessageStore():
     def __init__(self, size_threshold=None):
