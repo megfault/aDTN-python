@@ -127,8 +127,9 @@ class KeyManager():
 
 class aDTNPacket(Packet):
 
-    def __init__(self, *args, key=None, nonce=None, encrypt=True, **kwargs):
+    def __init__(self, *args, key=None, nonce=None, auto_encrypt=True, **kwargs):
         self.key = key
+        self.auto_encrypt = auto_encrypt
         super().__init__(*args, **kwargs)
 
     def encrypt(self):
@@ -151,24 +152,31 @@ class aDTNPacket(Packet):
     # TODO delegate to encrypt/decrypt after building
     # TODO also breaks show2 and other methods where build is called twice
     def post_build(self, pkt, pay):
-        return encrypt(pay, self.key)
+        if self.auto_encrypt:
+            return encrypt(pay, self.key)
+        return pay
 
     # TODO misuse of method, find the right one
     def extract_padding(self, s):
-        return decrypt(s, self.key), None
+        if self.auto_encrypt:
+            return decrypt(s, self.key), None
+        return s
 
-    def copy(self):
-        clone = super().copy()
+    def clone_attrs(self, clone):
+        # TODO clone all keys
         clone.key = self.key
+        clone.auto_encrypt = self.auto_encrypt
         return clone
 
     # TODO how to avoid such redundancy
     # scapy seems to have a oop structure problem
     def clone_with(self, payload=None, **kargs):
-        clone = super().clone_with(payload, **kargs)
-        clone.key = self.key
-        return clone
+        pkt = super().clone_with(payload, **kargs)
+        return self.clone_attrs(pkt)
 
+    def copy(self):
+        pkt = super().copy()
+        return self.clone_attrs(pkt)
 
 class aDTNInnerPacket(Packet):
     packet_len = 1460  # TODO get it from layer above, conf.padding_layer
