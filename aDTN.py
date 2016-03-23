@@ -2,6 +2,7 @@ from nacl.secret import *
 from nacl.utils import random as rand
 import nacl.hash
 import nacl.encoding
+from nacl.exceptions import CryptoError
 import struct
 from pathlib import Path
 import binascii
@@ -45,7 +46,7 @@ class aDTN():
         self.prepare_sending_pool()
         self.next_message = 0
         self.scheduler = sched.scheduler(time.time, time.sleep)
-        self.scheduler.enter(self.writing_interval(), self.write_message)
+        self.scheduler.enter(self.writing_interval(), 2, self.write_message)
         self.scheduler.enter(self.sending_freq, 1, self.send)
 
     def prepare_sending_pool(self):
@@ -65,7 +66,7 @@ class aDTN():
         batch = []
         sample = random.sample(self.sending_pool, self.batch_size)
         for pkt in sample:
-            batch.append(Ether(dst="ff:ff:ff:ff:ff:ff", type="0xcafe") / pkt)
+            batch.append(Ether(dst="ff:ff:ff:ff:ff:ff", type=0xcafe) / pkt)
             self.sending_pool.remove(pkt)
             pkt.show()
         sendp(batch, iface=WIRELESS_IFACE)
@@ -74,15 +75,20 @@ class aDTN():
     def process(self, aDTN_packet):
         aDTN_packet.show()
         for key in self.km.keys:
-            pass
-            # attempt to dissect packet
-            # if it works, break and add message to self.ms
+            try:
+                ap = aDTNPacket(key=key)
+                ap.dissect(aDTN_packet.build())
+                ap.show()
+                self.ms.add_message(ap.payload.payload)
+                return
+            except CryptoError:
+                pass
 
     def writing_interval(self):
         return  abs(random.gauss(self.creation_rate, self.creation_rate/4))
 
     def write_message(self):
-        self.scheduler.enter(self.writing_interval(), 1, self.write_message)
+        self.scheduler.enter(self.writing_interval(), 2, self.write_message)
         self.ms.add_message(self.name + str(self.next_message))
         self.next_message += 1
 
@@ -277,9 +283,9 @@ class MessageStore():
 if __name__ == "__main__":
     batch_size = 10
     sending_freq = 30
-    creation_rate = 4 * 3600 / 3600 / 4
+    creation_rate = 4 * 3600 / 3600 * 10
     device_name = "maxwell"
     bind_layers(aDTNPacket, aDTNInnerPacket)
-    bind_layers(Ether, aDTNPacket, type="0xcafe")
+    bind_layers(Ether, aDTNPacket, type=0xcafe)
     adtn = aDTN(batch_size, sending_freq, creation_rate, device_name)
     adtn.run()
