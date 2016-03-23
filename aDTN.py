@@ -92,8 +92,6 @@ class aDTN():
         t_snd = threading.Thread(target=sniff,
                                  kwargs={"prn": lambda p: self.process(p), "filter": "ether proto 0xcafe"})
         t_snd.run()
-        #threading.Thread()
-
 
 class KeyManager():
     def __init__(self):
