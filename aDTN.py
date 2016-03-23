@@ -45,7 +45,7 @@ class aDTN():
         self.prepare_sending_pool()
         self.next_message = 0
         self.scheduler = sched.scheduler(time.time, time.sleep)
-        self.scheduler.enter(self.get_interval(), self.write_message)
+        self.scheduler.enter(self.writing_interval(), self.write_message)
         self.scheduler.enter(self.sending_freq, 1, self.send)
 
     def prepare_sending_pool(self):
@@ -78,11 +78,11 @@ class aDTN():
             # attempt to dissect packet
             # if it works, break and add message to self.ms
 
-    def get_interval(self):
+    def writing_interval(self):
         return  abs(random.gauss(self.creation_rate, self.creation_rate/4))
 
     def write_message(self):
-        self.scheduler.enter(self.get_interval(), 1, self.write_message)
+        self.scheduler.enter(self.writing_interval(), 1, self.write_message)
         self.ms.add_message(self.name + str(self.next_message))
         self.next_message += 1
 
@@ -92,7 +92,7 @@ class aDTN():
         t_snd = threading.Thread(target=sniff,
                                  kwargs={"prn": lambda p: self.process(p), "filter": "ether proto 0xcafe"})
         t_snd.run()
-        threading.Thread()
+        #threading.Thread()
 
 
 class KeyManager():
