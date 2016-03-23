@@ -3,7 +3,6 @@ from nacl.utils import random as rand
 import nacl.hash
 import nacl.encoding
 from nacl.exceptions import CryptoError
-import struct
 from pathlib import Path
 import binascii
 from scapy.all import *
@@ -12,7 +11,6 @@ import time
 import sched
 import threading
 import random
-import math
 
 DEFAULT_DIR = ".sloth/"
 KEYS_DIR = "adtn/keys/"
