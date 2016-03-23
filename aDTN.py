@@ -39,7 +39,7 @@ class aDTN():
         self.batch_size = batch_size
         self.sending_freq = sending_freq
         self.creation_rate = creation_rate
-        self.name = name
+        self.device_name = name
         self.km = KeyManager()
         self.ms = MessageStore()
         self.sending_pool = []
@@ -89,7 +89,7 @@ class aDTN():
 
     def write_message(self):
         self.scheduler.enter(self.writing_interval(), 2, self.write_message)
-        self.ms.add_message(self.name + str(self.next_message))
+        self.ms.add_message(self.device_name + str(self.next_message))
         self.next_message += 1
 
     def run(self):
