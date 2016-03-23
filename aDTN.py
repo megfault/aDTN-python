@@ -137,7 +137,7 @@ class aDTNPacket(Packet):
         encrypted = encrypt(byteval, key)
         self.remove_payload()
         # add_payload will try to figure out the type
-        self.add_payload(encrypted)
+        self.add_payload(bytes(encrypted))
 
     def decrypt(self):
         key = self.key
@@ -146,23 +146,32 @@ class aDTNPacket(Packet):
         self.remove_payload()
         # add_payload will try to figure out the type
         # encrypted is of Type nacl.secret.EncryptedMessage
-        self.add_payload(aDTNInnerPacket(decypted))
+        self.add_payload(aDTNInnerPacket(decrypted))
+
+    def copy(self):
+        clone = super().copy()
+        clone.key = self.key
+        return clone
 
 
 class aDTNInnerPacket(Packet):
-    packet_len = 1468  # TODO get it from layer above, conf.padding_layer
+    packet_len = 1460  # TODO get it from layer above, conf.padding_layer
     fields_desc = [LenField("len", default=None)]
     # TODO configure payload type as EncryptedMessage
 
     def post_build(self, pkt, pay):
         # add padding, will be calculated when calling show2
         # which basically builds and dissects the same packet
-        pad_len = self.packet_len - len(pkt)
-        print(pkt)
+        pad_len = self.packet_len - len(pkt) - len(pay)
+        # TODO check while adding payload
+        if pad_len < 0:
+            raise ValueError("Payload in inner packet too big")
         return pkt + pay + b'0' * pad_len
 
     def extract_padding(self, s):
         l = self.len
+        if l > self.packet_len:
+            raise ValueError("Payload in inner packet too big")
         return s[:l], s[l:]
 
 
