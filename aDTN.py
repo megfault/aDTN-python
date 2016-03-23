@@ -45,14 +45,12 @@ class aDTN():
             to_send = self.ms.get_messages(self.batch_size)
             for message in to_send:
                 for key_id in self.km.keys:
-                    iv = generate_iv()
                     key = self.km.keys[key_id]
-                    pkt = (aDTNPacket(init_vector=iv)/aDTNInnerPacket()/message)
+                    pkt = (aDTNPacket(key=key)/aDTNInnerPacket()/message)
                     self.sending_pool.append(pkt)
             while len(self.sending_pool) < self.batch_size:
                 fake_key = self.km.get_fake_key()
-                iv = generate_iv()
-                self.sending_pool.append((aDTNPacket(init_vector=iv)/aDTNInnerPacket())) #TODO: pass fake_key to aDTNPacket
+                self.sending_pool.append((aDTNPacket(key=fake_key)/aDTNInnerPacket()))
 
     def send(self):
         batch = []
@@ -63,7 +61,8 @@ class aDTN():
         sendp(batch, iface=WIRELESS_IFACE)
         self.prepare_sending_pool()
 
-    def process(self):
+    def process(self, aDTN_packet):
+        aDTN_packet.show()
         for key in self.km.keys:
             pass
             # attempt to dissect packet
@@ -79,7 +78,7 @@ class aDTN():
         s.enter(-math.log(1.0 - random.random()) / self.creation_rate, 2, self.write_message)
         t_rcv = threading.Thread(target=s.run, kwargs={"blocking": True})
         t_rcv.run()
-        t_snd = threading.Thread(target=sniff, kwargs={"prn": self.process, "filter": "ether proto 0xcafe"})
+        t_snd = threading.Thread(target=sniff, kwargs={"prn": lambda p: self.process(p), "filter": "ether proto 0xcafe"})
         t_snd.run()
         threading.Thread()
 
@@ -199,8 +198,6 @@ class aDTNInnerPacket(Packet):
         return s[:l], s[l:]
 
 
-bind_layers( aDTNPacket, aDTNInnerPacket)
-
 class MessageStore():
     def __init__(self, size_threshold=None):
         self.size_threshold = size_threshold
@@ -272,5 +269,6 @@ if __name__ == "__main__":
     sending_freq = 30
     creation_rate = 4 * 3600
     device_name = "maxwell"
+    bind_layers(aDTNPacket, aDTNInnerPacket)
     adtn = aDTN(batch_size, sending_freq, creation_rate, device_name)
     adtn.run()
