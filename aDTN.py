@@ -270,5 +270,6 @@ if __name__ == "__main__":
     creation_rate = 4 * 3600
     device_name = "maxwell"
     bind_layers(aDTNPacket, aDTNInnerPacket)
+    bind_layers(Ether, aDTNPacket, type="0xcafe")
     adtn = aDTN(batch_size, sending_freq, creation_rate, device_name)
     adtn.run()
