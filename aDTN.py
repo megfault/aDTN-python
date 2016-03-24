@@ -11,6 +11,7 @@ import time
 import sched
 import threading
 import random
+import argparse
 
 DEFAULT_DIR = ".sloth/"
 KEYS_DIR = "adtn/keys/"
@@ -48,8 +49,8 @@ class aDTN():
         self.scheduler.enter(self.sending_freq, 1, self.send)
 
     def prepare_sending_pool(self):
-        if len(self.sending_pool) < 2 * self.batch_size:
-            to_send = self.ms.get_messages(self.batch_size)
+        if len(self.sending_pool) < self.batch_size:
+            to_send = self.ms.get_messages(count=self.batch_size)
             for message in to_send:
                 for key_id in self.km.keys:
                     key = self.km.keys[key_id]
@@ -220,6 +221,7 @@ class MessageStore():
         cursor = conn.cursor()
         cursor.execute("DELETE FROM stats;")
         cursor.execute("DELETE FROM message;")
+        conn.commit()
         conn.close()
         self.lock = threading.RLock()
 
@@ -237,12 +239,14 @@ class MessageStore():
                 # new message
                 cursor.execute("INSERT INTO stats VALUES (?, ?, ?, ?, ?, ?, ?)", [idx, now, None, None, 0, 0, None])
                 cursor.execute("INSERT INTO message VALUES (?, ?)", [idx, message])
+                print("message inserted:", message)
                 self.message_count += 1
             else:
                 h, first_seen, last_rcv, last_sent, rcv_ct, snd_ct = res[0]
                 cursor.execute("UPDATE stats SET last_rcv=?, snd_ct=? WHERE hash=?", [now, rcv_ct + 1, idx])
             if self.size_threshold and self.message_count > self.size_threshold:
                 self.purge(10)
+            conn.commit()
             conn.close()
 
     def purge(self, count):
@@ -256,6 +260,7 @@ class MessageStore():
                 idx = r[0]
                 cursor.execute("DELETE FROM message WHERE hash=?", [idx])
                 cursor.execute("UPDATE stats SET deleted=? WHERE hash=?", [now, idx])
+            conn.commit()
             conn.close()
 
     def get_messages(self, count=1):
@@ -274,16 +279,20 @@ class MessageStore():
                 cursor.execute("SELECT snd_ct FROM stats WHERE hash=?", [idx])
                 snd_ct = cursor.fetchone()[0]
                 cursor.execute("UPDATE stats SET last_snt=?, snd_ct=? WHERE hash=?", [now, snd_ct + 1, idx])
+            conn.commit()
             conn.close()
         return messages
 
 
 if __name__ == "__main__":
-    batch_size = 10
-    sending_freq = 30
-    creation_rate = 4 * 3600 / 3600 * 10
-    device_name = "maxwell"
+    parser = argparse.ArgumentParser(description='Run an aDTN simulation instance.')
+    parser.add_argument('batch_size', type=int, help='how many messages to send in a batch')                #10
+    parser.add_argument('sending_freq', type=int, help='interval (in s) between sending a batch')           #30
+    parser.add_argument('creation_rate', type=int, help='avg interval between creating a new message')      #4*3600 = 14400
+    parser.add_argument('device_name', type=str, help='name of this device')                                #maxwell
+    args = parser.parse_args()
+
     bind_layers(aDTNPacket, aDTNInnerPacket)
     bind_layers(Ether, aDTNPacket, type=0xcafe)
-    adtn = aDTN(batch_size, sending_freq, creation_rate, device_name)
+    adtn = aDTN(args.batch_size, args.sending_freq, args.creation_rate, args.device_name)
     adtn.run()
