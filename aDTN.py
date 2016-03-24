@@ -18,8 +18,6 @@ KEYS_DIR = "keys/"
 DATABASE_FN = "messagestore.db"
 PACKET_SIZE = 1500
 MAX_INNER_SIZE = 1466
-WIRELESS_IFACE = "wlp3s0"
-
 
 def generate_iv():
     return rand(SecretBox.NONCE_SIZE)
@@ -34,11 +32,12 @@ def decrypt(encrypted, key):
 
 
 class aDTN():
-    def __init__(self, batch_size, sending_freq, creation_rate, name):
+    def __init__(self, batch_size, sending_freq, creation_rate, name, wireless_interface):
         self.batch_size = batch_size
         self.sending_freq = sending_freq
         self.creation_rate = creation_rate
         self.device_name = name
+        self.wireless_interface = wireless_interface
         self.km = KeyManager()
         self.ms = MessageStore()
         self.sending_pool = []
@@ -68,7 +67,7 @@ class aDTN():
             batch.append(Ether(dst="ff:ff:ff:ff:ff:ff", type=0xcafe) / pkt)
             self.sending_pool.remove(pkt)
             pkt.show()
-        sendp(batch, iface=WIRELESS_IFACE)
+        sendp(batch, iface=self.wireless_interface)
         self.prepare_sending_pool()
 
     def process(self, aDTN_packet):
@@ -94,7 +93,7 @@ class aDTN():
     def run(self):
         t_rcv = threading.Thread(target=self.scheduler.run, kwargs={"blocking": True})
         t_rcv.run()
-        t_snd = threading.Thread(target=sniff,
+        t_snd = threading.Thread(target=sniff, args=(self.wireless_interface),
                                  kwargs={"prn": lambda p: self.process(p), "filter": "ether proto 0xcafe"})
         t_snd.run()
 
@@ -292,9 +291,10 @@ if __name__ == "__main__":
     parser.add_argument('sending_freq', type=int, help='interval (in s) between sending a batch')           #30
     parser.add_argument('creation_rate', type=int, help='avg interval between creating a new message')      #4*3600 = 14400
     parser.add_argument('device_name', type=str, help='name of this device')                                #maxwell
+    parser.add_argument('wireless_interface', type=str,help='name of the wireless interface')
     args = parser.parse_args()
 
     bind_layers(aDTNPacket, aDTNInnerPacket)
     bind_layers(Ether, aDTNPacket, type=0xcafe)
-    adtn = aDTN(args.batch_size, args.sending_freq, args.creation_rate, args.device_name)
+    adtn = aDTN(args.batch_size, args.sending_freq, args.creation_rate, args.device_name, args.wireless_interface)
     adtn.run()
