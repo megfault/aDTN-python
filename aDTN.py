@@ -66,7 +66,6 @@ class aDTN():
         for pkt in sample:
             batch.append(Ether(dst="ff:ff:ff:ff:ff:ff", type=0xcafe) / pkt)
             self.sending_pool.remove(pkt)
-            pkt.show()
         sendp(batch, iface=self.wireless_interface)
         self.prepare_sending_pool()
 
@@ -76,11 +75,12 @@ class aDTN():
             try:
                 ap = aDTNPacket(key=key)
                 ap.dissect(aDTN_packet.build())
-                ap.show()
                 self.ms.add_message(ap.payload.payload)
+                print("Decrypted using key {}.".format(key))
+                ap.show()
                 return
             except CryptoError:
-                pass
+                print("Unable to decrypt.")
 
     def writing_interval(self):
         return  abs(random.gauss(self.creation_rate, self.creation_rate/4))
