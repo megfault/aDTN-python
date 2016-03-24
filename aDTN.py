@@ -244,12 +244,13 @@ class MessageStore():
             else:
                 h, first_seen, last_rcv, last_sent, rcv_ct, snd_ct = res[0]
                 cursor.execute("UPDATE stats SET last_rcv=?, snd_ct=? WHERE hash=?", [now, rcv_ct + 1, idx])
-            if self.size_threshold and self.message_count > self.size_threshold:
+            if self.size_threshold is not None and self.message_count > self.size_threshold:
                 self.purge(10)
             conn.commit()
             conn.close()
 
     def purge(self, count):
+        print("i should not happen")
         with self.lock:
             conn = sqlite3.connect(DEFAULT_DIR + DATABASE_FN)
             cursor = conn.cursor()
@@ -265,6 +266,7 @@ class MessageStore():
 
     def get_messages(self, count=1):
         with self.lock:
+            print("getting {} messages".format(count))
             conn = sqlite3.connect(DEFAULT_DIR + DATABASE_FN)
             cursor = conn.cursor()
             cursor.execute("SELECT hash FROM stats ORDER BY rcv_ct ASC, snd_ct ASC, last_snt ASC")
