@@ -13,9 +13,9 @@ import threading
 import random
 import argparse
 
-DEFAULT_DIR = ".sloth/"
-KEYS_DIR = "adtn/keys/"
-DATABASE_FN = "store.db"
+DEFAULT_DIR = "data/"
+KEYS_DIR = "keys/"
+DATABASE_FN = "messagestore.db"
 PACKET_SIZE = 1500
 MAX_INNER_SIZE = 1466
 WIRELESS_IFACE = "wlp3s0"
