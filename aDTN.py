@@ -5,7 +5,7 @@ import nacl.encoding
 from nacl.exceptions import CryptoError
 from pathlib import Path
 import binascii
-from scapy.all import *
+from scapy.all import Ether, Packet, LenField, sendp, sniff, bind_layers
 import sqlite3
 import time
 import sched
@@ -18,6 +18,7 @@ KEYS_DIR = "keys/"
 DATABASE_FN = "messagestore.db"
 PACKET_SIZE = 1500
 MAX_INNER_SIZE = 1466
+
 
 def generate_iv():
     return rand(SecretBox.NONCE_SIZE)
@@ -83,7 +84,7 @@ class aDTN():
                 print("Unable to decrypt.")
 
     def writing_interval(self):
-        return  abs(random.gauss(self.creation_rate, self.creation_rate/4))
+        return abs(random.gauss(self.creation_rate, self.creation_rate / 4))
 
     def write_message(self):
         self.scheduler.enter(self.writing_interval(), 2, self.write_message)
@@ -93,9 +94,11 @@ class aDTN():
     def run(self):
         t_rcv = threading.Thread(target=self.scheduler.run, kwargs={"blocking": True})
         t_rcv.run()
-        t_snd = threading.Thread(target=sniff, args=(self.wireless_interface),
-                                 kwargs={"prn": lambda p: self.process(p), "filter": "ether proto 0xcafe"})
+        t_snd = threading.Thread(target=sniff,
+                                 kwargs={"iface": self.wireless_interface, "prn": lambda p: self.process(p),
+                                         "filter": "ether proto 0xcafe"})
         t_snd.run()
+
 
 class KeyManager():
     def __init__(self):
@@ -287,11 +290,11 @@ class MessageStore():
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Run an aDTN simulation instance.')
-    parser.add_argument('batch_size', type=int, help='how many messages to send in a batch')                #10
-    parser.add_argument('sending_freq', type=int, help='interval (in s) between sending a batch')           #30
-    parser.add_argument('creation_rate', type=int, help='avg interval between creating a new message')      #4*3600 = 14400
-    parser.add_argument('device_name', type=str, help='name of this device')                                #maxwell
-    parser.add_argument('wireless_interface', type=str,help='name of the wireless interface')
+    parser.add_argument('batch_size', type=int, help='how many messages to send in a batch')  # 10
+    parser.add_argument('sending_freq', type=int, help='interval (in s) between sending a batch')  # 30
+    parser.add_argument('creation_rate', type=int, help='avg interval between creating a new message')  # 4*3600 = 14400
+    parser.add_argument('device_name', type=str, help='name of this device')  # maxwell
+    parser.add_argument('wireless_interface', type=str, help='name of the wireless interface')
     args = parser.parse_args()
 
     bind_layers(aDTNPacket, aDTNInnerPacket)
