@@ -9,7 +9,7 @@ from scapy.all import Ether, Packet, LenField, sendp, sniff, bind_layers
 import sqlite3
 import time
 import sched
-import threading
+from multiprocessing import Process, RLock
 import random
 import argparse
 
@@ -92,12 +92,12 @@ class aDTN():
         self.next_message += 1
 
     def run(self):
-        t_rcv = threading.Thread(target=self.scheduler.run, kwargs={"blocking": True})
-        t_rcv.run()
-        t_snd = threading.Thread(target=sniff,
+        t_snd = Process(target=self.scheduler.run, kwargs={"blocking": False})
+        t_snd.run()
+        t_rcv = Process(target=sniff,
                                  kwargs={"iface": self.wireless_interface, "prn": lambda p: self.process(p),
                                          "filter": "ether proto 0xcafe"})
-        t_snd.run()
+        t_rcv.run()
 
 
 class KeyManager():
@@ -225,7 +225,7 @@ class MessageStore():
         cursor.execute("DELETE FROM message;")
         conn.commit()
         conn.close()
-        self.lock = threading.RLock()
+        self.lock = RLock()
 
     def add_message(self, message):
         bytes = message.encode('utf-8')
