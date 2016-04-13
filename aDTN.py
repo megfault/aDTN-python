@@ -52,10 +52,10 @@ class aDTN():
         if len(self.sending_pool) < self.batch_size:
             to_send = self.ms.get_messages(count=self.batch_size)
             for message in to_send:
-                for key_id in self.km.keys:
-                    key = self.km.keys[key_id]
+                for key in self.km.keys.values():
                     pkt = (aDTNPacket(key=key) / aDTNInnerPacket() / message)
                     self.sending_pool.append(pkt)
+                    print("Encrypted using key {}.".format(key))
             while len(self.sending_pool) < self.batch_size:
                 fake_key = self.km.get_fake_key()
                 self.sending_pool.append((aDTNPacket(key=fake_key) / aDTNInnerPacket()))
@@ -72,12 +72,13 @@ class aDTN():
 
     def process(self, aDTN_packet):
         aDTN_packet.show()
-        for key in self.km.keys:
+        for key in self.km.keys.values():
+            print("Attempting to decrypt with key {}".format(key))
             try:
                 ap = aDTNPacket(key=key)
                 ap.dissect(aDTN_packet.build())
                 self.ms.add_message(ap.payload.payload)
-                print("Decrypted using key {}.".format(key))
+                print("Decrypted.")
                 ap.show()
                 return
             except CryptoError:
@@ -179,7 +180,8 @@ class aDTNPacket(Packet):
 
     def clone_attrs(self, clone):
         # TODO clone all keys
-        clone.key = self.key
+        clone.key = self.key                hx = s.encode('utf-8')
+
         clone.auto_encrypt = self.auto_encrypt
         return clone
 
