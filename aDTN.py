@@ -72,7 +72,7 @@ class aDTN():
 
     def process(self, aDTN_packet):
         for key in self.km.keys.values():
-            print("Attempting to decrypt with key {}".format(key))
+            print("Attempting to decrypt with key {}.".format(key))
             try:
                 ap = aDTNPacket(key=key)
                 ap.dissect(aDTN_packet.build())
