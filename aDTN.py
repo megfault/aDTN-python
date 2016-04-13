@@ -180,8 +180,7 @@ class aDTNPacket(Packet):
 
     def clone_attrs(self, clone):
         # TODO clone all keys
-        clone.key = self.key                hx = s.encode('utf-8')
-
+        clone.key = self.key
         clone.auto_encrypt = self.auto_encrypt
         return clone
 
