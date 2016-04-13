@@ -91,12 +91,12 @@ class aDTN():
         self.next_message += 1
 
     def run(self):
-        t_rcv = Thread(target=sniff,
-                                 kwargs={"iface": self.wireless_interface, "prn": lambda p: self.process(p),
-                                         "filter": "ether proto 0xcafe"})
-        t_rcv.run()
         t_snd = Thread(target=self.scheduler.run, kwargs={"blocking": True})
+        t_rcv = Thread(target=sniff, kwargs={"iface": self.wireless_interface,
+                                             "prn": lambda p: self.process(p),
+                                             "filter": "ether proto 0xcafe"})
         t_snd.run()
+        t_rcv.run()
 
 
 class KeyManager():
