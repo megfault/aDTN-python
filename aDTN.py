@@ -20,6 +20,9 @@ DATABASE_FN = "messagestore.db"
 PACKET_SIZE = 1500
 MAX_INNER_SIZE = 1466
 
+logging.basicConfig(level=logging.DEBUG,
+                    format='[%(levelname)s] %(message)s',
+                    )
 
 def generate_iv():
     return rand(SecretBox.NONCE_SIZE)
