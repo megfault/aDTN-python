@@ -244,7 +244,7 @@ class MessageStore():
                 # new message
                 cursor.execute("INSERT INTO stats VALUES (?, ?, ?, ?, ?, ?, ?)", [idx, now, None, None, 0, 0, None])
                 cursor.execute("INSERT INTO message VALUES (?, ?)", [idx, message])
-                logging.debug("message inserted:", message)
+                logging.debug("message inserted: {}".format(message))
                 self.message_count += 1
             else:
                 h, first_seen, last_rcv, last_sent, rcv_ct, snd_ct = res[0]
