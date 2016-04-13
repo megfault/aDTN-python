@@ -12,6 +12,7 @@ import sched
 from threading import RLock, Thread
 import random
 import argparse
+import logging
 
 DEFAULT_DIR = "data/"
 KEYS_DIR = "keys/"
@@ -55,7 +56,7 @@ class aDTN():
                 for key in self.km.keys.values():
                     pkt = (aDTNPacket(key=key) / aDTNInnerPacket() / message)
                     self.sending_pool.append(pkt)
-                    print("Encrypted using key {}.".format(key))
+                    logging.debug("Encrypted using key {}.".format(key))
             while len(self.sending_pool) < self.batch_size:
                 fake_key = self.km.get_fake_key()
                 self.sending_pool.append((aDTNPacket(key=fake_key) / aDTNInnerPacket()))
@@ -72,15 +73,15 @@ class aDTN():
 
     def process(self, aDTN_packet):
         for key in self.km.keys.values():
-            print("Attempting to decrypt with key {}.".format(key))
+            logging.debug("Attempting to decrypt with key {}.".format(key))
             try:
                 ap = aDTNPacket(key=key)
                 ap.dissect(aDTN_packet.build())
                 self.ms.add_message(ap.payload.payload)
-                print("Decrypted.")
+                logging.debug("Decrypted.")
                 return
             except CryptoError:
-                print("Unable to decrypt.")
+                logging.debug("Unable to decrypt.")
 
     def writing_interval(self):
         return abs(random.gauss(self.creation_rate, self.creation_rate / 4))
@@ -240,7 +241,7 @@ class MessageStore():
                 # new message
                 cursor.execute("INSERT INTO stats VALUES (?, ?, ?, ?, ?, ?, ?)", [idx, now, None, None, 0, 0, None])
                 cursor.execute("INSERT INTO message VALUES (?, ?)", [idx, message])
-                print("message inserted:", message)
+                logging.debug("message inserted:", message)
                 self.message_count += 1
             else:
                 h, first_seen, last_rcv, last_sent, rcv_ct, snd_ct = res[0]
@@ -251,7 +252,6 @@ class MessageStore():
             conn.close()
 
     def purge(self, count):
-        print("i should not happen")
         with self.lock:
             conn = sqlite3.connect(DEFAULT_DIR + DATABASE_FN)
             cursor = conn.cursor()
@@ -267,7 +267,6 @@ class MessageStore():
 
     def get_messages(self, count=1):
         with self.lock:
-            print("getting {} messages".format(count))
             conn = sqlite3.connect(DEFAULT_DIR + DATABASE_FN)
             cursor = conn.cursor()
             cursor.execute("SELECT hash FROM stats ORDER BY rcv_ct ASC, snd_ct ASC, last_snt ASC")
