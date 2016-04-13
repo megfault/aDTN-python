@@ -9,7 +9,7 @@ from scapy.all import Ether, Packet, LenField, sendp, sniff, bind_layers
 import sqlite3
 import time
 import sched
-from multiprocessing import Process, RLock
+from threading import RLock, Thread
 import random
 import argparse
 
@@ -71,7 +71,6 @@ class aDTN():
         self.prepare_sending_pool()
 
     def process(self, aDTN_packet):
-        aDTN_packet.show()
         for key in self.km.keys.values():
             print("Attempting to decrypt with key {}".format(key))
             try:
@@ -79,7 +78,6 @@ class aDTN():
                 ap.dissect(aDTN_packet.build())
                 self.ms.add_message(ap.payload.payload)
                 print("Decrypted.")
-                ap.show()
                 return
             except CryptoError:
                 print("Unable to decrypt.")
@@ -93,11 +91,11 @@ class aDTN():
         self.next_message += 1
 
     def run(self):
-        t_rcv = Process(target=sniff,
+        t_rcv = Thread(target=sniff,
                                  kwargs={"iface": self.wireless_interface, "prn": lambda p: self.process(p),
                                          "filter": "ether proto 0xcafe"})
         t_rcv.run()
-        t_snd = Process(target=self.scheduler.run, kwargs={"blocking": False})
+        t_snd = Thread(target=self.scheduler.run, kwargs={"blocking": True})
         t_snd.run()
 
 
