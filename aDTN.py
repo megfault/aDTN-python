@@ -93,12 +93,12 @@ class aDTN():
         self.next_message += 1
 
     def run(self):
-        t_snd = Process(target=self.scheduler.run, kwargs={"blocking": False})
-        t_snd.run()
         t_rcv = Process(target=sniff,
                                  kwargs={"iface": self.wireless_interface, "prn": lambda p: self.process(p),
                                          "filter": "ether proto 0xcafe"})
         t_rcv.run()
+        t_snd = Process(target=self.scheduler.run, kwargs={"blocking": False})
+        t_snd.run()
 
 
 class KeyManager():
