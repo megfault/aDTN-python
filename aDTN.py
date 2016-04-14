@@ -79,6 +79,7 @@ class aDTN():
             batch.append(Ether(dst="ff:ff:ff:ff:ff:ff", type=0xcafe) / pkt)
             self.sending_pool.remove(pkt)
         sendp(batch, iface=self.wireless_interface)
+        logging.debug("\tSent batch")
         self.prepare_sending_pool()
 
     def process(self, frame):
@@ -89,8 +90,8 @@ class aDTN():
             try:
                 ap = aDTNPacket(key=key)
                 ap.dissect(payload)
-                self.ms.add_message(b2s(ap.payload.payload.load))
                 logging.debug("\tDecrypted")
+                self.ms.add_message(b2s(ap.payload.payload.load))
                 return
             except CryptoError:
                 logging.debug("\tUnable to decrypt")
