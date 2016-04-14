@@ -59,7 +59,7 @@ class aDTN():
                 for key in self.km.keys.values():
                     pkt = (aDTNPacket(key=key) / aDTNInnerPacket() / message)
                     self.sending_pool.append(pkt)
-                    logging.debug("Encrypted using key {}.".format(binascii.hexlify(key).decode('utf-8')))
+                    logging.debug("Encrypted using key {}".format(binascii.hexlify(key).decode('utf-8')[:6]))
             while len(self.sending_pool) < self.batch_size:
                 fake_key = self.km.get_fake_key()
                 self.sending_pool.append((aDTNPacket(key=fake_key) / aDTNInnerPacket()))
@@ -76,15 +76,15 @@ class aDTN():
 
     def process(self, aDTN_packet):
         for key in self.km.keys.values():
-            logging.debug("Attempting to decrypt with key {}.".format(binascii.hexlify(key).decode('utf8')))
+            logging.debug("Attempting to decrypt with key {}".format(binascii.hexlify(key).decode('utf8')[:6]))
             try:
                 ap = aDTNPacket(key=key)
                 ap.dissect(aDTN_packet.build())
                 self.ms.add_message(ap.payload.payload)
-                logging.debug("Decrypted.")
+                logging.debug("\tDecrypted")
                 return
             except CryptoError:
-                logging.debug("Unable to decrypt.")
+                logging.debug("\tUnable to decrypt")
 
     def writing_interval(self):
         return abs(random.gauss(self.creation_rate, self.creation_rate / 4))
