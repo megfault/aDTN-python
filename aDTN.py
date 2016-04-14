@@ -237,8 +237,9 @@ class MessageStore():
         conn.close()
         self.lock = RLock()
 
-    def add_message(self, message):
-        bytes = message.encode('utf-8')
+    def add_message(self, bytes):
+        message = bytes.decode('utf-8')
+        print(bytes, message)
         h = nacl.hash.sha256(bytes, nacl.encoding.HexEncoder)
         idx = h.decode('utf-8')
         with self.lock:
