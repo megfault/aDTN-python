@@ -77,6 +77,7 @@ class aDTN():
             batch.append(Ether(dst="ff:ff:ff:ff:ff:ff", type=0xcafe) / pkt)
             self.sending_pool.remove(pkt)
         sendp(batch, iface=self.wireless_interface)
+        logging.debug("Sent batch")
         self.prepare_sending_pool()
 
     def process(self, frame):
