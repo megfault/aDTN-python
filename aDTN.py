@@ -255,10 +255,10 @@ class MessageStore():
                 h, first_seen, last_rcv, last_sent, rcv_ct, snd_ct, deleted = res[0]
                 logging.debug("data to update: {}, {}, {}".format(now, rcv_ct, idx))
                 cursor.execute("UPDATE stats SET last_rcv=?, snd_ct=? WHERE hash=?", [now, rcv_ct + 1, idx])
-            if self.size_threshold is not None and self.message_count > self.size_threshold:
-                self.purge(10)
             conn.commit()
             conn.close()
+        if self.size_threshold is not None and self.message_count > self.size_threshold:
+            self.purge(10)
 
     def purge(self, count):
         with self.lock:
