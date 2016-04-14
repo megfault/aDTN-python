@@ -75,14 +75,14 @@ class aDTN():
         batch = []
         sample = random.sample(self.sending_pool, self.batch_size)
         for pkt in sample:
-            logging.debug("Sent packet {}".format(pkt))
+            logging.debug("Sent packet {}".format(b2s(pkt)[:6]))
             batch.append(Ether(dst="ff:ff:ff:ff:ff:ff", type=0xcafe) / pkt)
             self.sending_pool.remove(pkt)
         sendp(batch, iface=self.wireless_interface)
         self.prepare_sending_pool()
 
     def process(self, aDTN_packet):
-        logging.debug("Received packet {}".format(aDTN_packet))
+        logging.debug("Received packet {}".format(b2s(aDTN_packet)[:6]))
         for key in self.km.keys.values():
             logging.debug("Attempting to decrypt with key {}".format(b2s(key)[:6]))
             try:
