@@ -63,7 +63,7 @@ class aDTN():
             to_send = self.ms.get_messages(count=self.batch_size)
             for message in to_send:
                 for key in self.km.keys.values():
-                    pkt = (aDTNPacket(key=key) / aDTNInnerPacket() / message)
+                    pkt = aDTNPacket(key=key) / aDTNInnerPacket() / message
                     self.sending_pool.append(pkt)
                     logging.debug("Encrypted using key {}".format(b2s(key)[:6]))
             while len(self.sending_pool) < self.batch_size:
