@@ -76,7 +76,7 @@ class aDTN():
 
     def process(self, aDTN_packet):
         for key in self.km.keys.values():
-            logging.debug("Attempting to decrypt with key {}.".format(binascii.hexlify(key)).decode('utf8'))
+            logging.debug("Attempting to decrypt with key {}.".format(binascii.hexlify(key).decode('utf8')))
             try:
                 ap = aDTNPacket(key=key)
                 ap.dissect(aDTN_packet.build())
