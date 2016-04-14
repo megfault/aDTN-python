@@ -59,7 +59,7 @@ class aDTN():
                 for key in self.km.keys.values():
                     pkt = (aDTNPacket(key=key) / aDTNInnerPacket() / message)
                     self.sending_pool.append(pkt)
-                    logging.debug("Encrypted using key {}.".format(key))
+                    logging.debug("Encrypted using key {}.".format(key.unhexlify()))
             while len(self.sending_pool) < self.batch_size:
                 fake_key = self.km.get_fake_key()
                 self.sending_pool.append((aDTNPacket(key=fake_key) / aDTNInnerPacket()))
@@ -76,7 +76,7 @@ class aDTN():
 
     def process(self, aDTN_packet):
         for key in self.km.keys.values():
-            logging.debug("Attempting to decrypt with key {}.".format(key))
+            logging.debug("Attempting to decrypt with key {}.".format(key.unhexlify()))
             try:
                 ap = aDTNPacket(key=key)
                 ap.dissect(aDTN_packet.build())
@@ -99,8 +99,8 @@ class aDTN():
         t_rcv = Thread(target=sniff, kwargs={"iface": self.wireless_interface,
                                              "prn": lambda p: self.process(p),
                                              "filter": "ether proto 0xcafe"})
-        t_snd.run()
         t_rcv.run()
+        t_snd.run()
 
 
 class KeyManager():
