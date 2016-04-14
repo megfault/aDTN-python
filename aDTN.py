@@ -65,7 +65,6 @@ class aDTN():
                 for key in self.km.keys.values():
                     pkt = aDTNPacket(key=key) / aDTNInnerPacket() / message
                     self.sending_pool.append(pkt)
-                    logging.debug("Encrypted using key {}".format(b2s(key)[:6]))
             while len(self.sending_pool) < self.batch_size:
                 fake_key = self.km.get_fake_key()
                 self.sending_pool.append((aDTNPacket(key=fake_key) / aDTNInnerPacket()))
@@ -75,27 +74,23 @@ class aDTN():
         batch = []
         sample = random.sample(self.sending_pool, self.batch_size)
         for pkt in sample:
-            logging.debug("Sent packet {}".format(pkt))
             batch.append(Ether(dst="ff:ff:ff:ff:ff:ff", type=0xcafe) / pkt)
             self.sending_pool.remove(pkt)
         sendp(batch, iface=self.wireless_interface)
-        logging.debug("\tSent batch")
         self.prepare_sending_pool()
 
     def process(self, frame):
         payload = frame.payload.load
-        logging.debug("Received packet {}".format(payload))
         for key in self.km.keys.values():
-            logging.debug("Attempting to decrypt with key {}".format(b2s(key)[:6]))
             try:
                 ap = aDTNPacket(key=key)
                 ap.dissect(payload)
-                logging.debug("\tDecrypted")
-                self.ms.add_message(b2s(ap.payload.payload.load))
+                msg = ap.payload.payload.load
+                logging.debug("Decrypted with key {}".format(b2s(key)[:6]))
+                self.ms.add_message(b2s(msg))
                 return
             except CryptoError:
-                logging.debug("\tUnable to decrypt")
-
+                pass
     def writing_interval(self):
         return abs(random.gauss(self.creation_rate, self.creation_rate / 4))
 
