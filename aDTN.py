@@ -75,7 +75,7 @@ class aDTN():
         batch = []
         sample = random.sample(self.sending_pool, self.batch_size)
         for pkt in sample:
-            logging.debug("Sent packet {}".format(b2s(pkt)[:16]))
+            logging.debug("Sent packet {}".format(pkt))
             batch.append(Ether(dst="ff:ff:ff:ff:ff:ff", type=0xcafe) / pkt)
             self.sending_pool.remove(pkt)
         sendp(batch, iface=self.wireless_interface)
@@ -177,13 +177,13 @@ class aDTNPacket(Packet):
     # TODO delegate to encrypt/decrypt after building
     # TODO also breaks show2 and other methods where build is called twice
     def post_build(self, pkt, pay):
-        if self.auto_encrypt and self.key:
+        if self.auto_encrypt and self.key is not None:
             return encrypt(pay, self.key)
         return pay
 
     # TODO misuse of method, find the right one
     def extract_padding(self, s):
-        if self.auto_encrypt and self.key:
+        if self.auto_encrypt and self.key is not None:
             return decrypt(s, self.key), None
         return s
 
