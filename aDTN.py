@@ -21,7 +21,7 @@ PACKET_SIZE = 1500
 MAX_INNER_SIZE = 1466
 
 logging.basicConfig(filename='aDTN.log', level=logging.DEBUG,
-                    format='[%(levelname)s] %(message)s',
+                    format='[%(relativeCreated)8d] %(message)s',
                     )
 
 def generate_iv():
