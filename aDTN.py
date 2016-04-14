@@ -99,8 +99,8 @@ class aDTN():
         t_rcv = Thread(target=sniff, kwargs={"iface": self.wireless_interface,
                                              "prn": lambda p: self.process(p),
                                              "filter": "ether proto 0xcafe"})
-        t_rcv.run()
-        t_snd.run()
+        t_snd.start()
+        t_rcv.start()
 
 
 class KeyManager():
