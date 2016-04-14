@@ -170,13 +170,13 @@ class aDTNPacket(Packet):
     # TODO delegate to encrypt/decrypt after building
     # TODO also breaks show2 and other methods where build is called twice
     def post_build(self, pkt, pay):
-        if self.auto_encrypt:
+        if self.auto_encrypt and self.key:
             return encrypt(pay, self.key)
         return pay
 
     # TODO misuse of method, find the right one
     def extract_padding(self, s):
-        if self.auto_encrypt:
+        if self.auto_encrypt and self.key:
             return decrypt(s, self.key), None
         return s
 
