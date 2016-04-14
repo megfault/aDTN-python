@@ -36,11 +36,11 @@ def decrypt(encrypted, key):
     return SecretBox(key).decrypt(encrypted)
 
 
-def b2s(bytes):
-    return binascii.hexlify(bytes).decode('utf-8')
+def b2s(b):
+    return binascii.hexlify(b).decode('utf-8')
 
-def s2b(string):
-    return binascii.unhexlify(string.encode('utf-8'))
+def s2b(s):
+    return binascii.unhexlify(s.encode('utf-8'))
 
 class aDTN():
     def __init__(self, batch_size, sending_freq, creation_rate, name, wireless_interface):
