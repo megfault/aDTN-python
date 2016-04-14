@@ -75,7 +75,7 @@ class aDTN():
         batch = []
         sample = random.sample(self.sending_pool, self.batch_size)
         for pkt in sample:
-            logging.debug("Sent packet {}".format(pkt))
+            logging.debug("Sent packet {}".format(b2s(pkt)[:16]))
             batch.append(Ether(dst="ff:ff:ff:ff:ff:ff", type=0xcafe) / pkt)
             self.sending_pool.remove(pkt)
         sendp(batch, iface=self.wireless_interface)
