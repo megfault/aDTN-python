@@ -87,6 +87,7 @@ class aDTN():
                 ap.dissect(payload)
                 msg = ap.payload.payload.load
                 logging.debug("Decrypted with key {}".format(b2s(key)[:6]))
+                logging.debug("Received msg: {}".format(msg))
                 self.ms.add_message(b2s(msg))
                 return
             except CryptoError:
