@@ -81,14 +81,15 @@ class aDTN():
         sendp(batch, iface=self.wireless_interface)
         self.prepare_sending_pool()
 
-    def process(self, aDTN_packet):
-        logging.debug("Received packet {}".format(aDTN_packet))
+    def process(self, frame):
+        payload = frame.payload.load
+        logging.debug("Received packet {}".format(payload))
         for key in self.km.keys.values():
             logging.debug("Attempting to decrypt with key {}".format(b2s(key)[:6]))
             try:
                 ap = aDTNPacket(key=key)
-                ap.dissect(aDTN_packet.build())
-                self.ms.add_message(ap.payload.payload)
+                ap.dissect(payload)
+                self.ms.add_message(ap.payload.payload.load)
                 logging.debug("\tDecrypted")
                 return
             except CryptoError:
