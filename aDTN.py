@@ -89,7 +89,7 @@ class aDTN():
             try:
                 ap = aDTNPacket(key=key)
                 ap.dissect(payload)
-                self.ms.add_message(ap.payload.payload.load)
+                self.ms.add_message(b2s(ap.payload.payload.load))
                 logging.debug("\tDecrypted")
                 return
             except CryptoError:
@@ -237,9 +237,8 @@ class MessageStore():
         conn.close()
         self.lock = RLock()
 
-    def add_message(self, bytes):
-        message = bytes.decode('utf-8')
-        print(bytes, message)
+    def add_message(self, message):
+        bytes = message.encode('utf-8')
         h = nacl.hash.sha256(bytes, nacl.encoding.HexEncoder)
         idx = h.decode('utf-8')
         with self.lock:
