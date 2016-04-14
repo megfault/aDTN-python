@@ -85,10 +85,10 @@ class aDTN():
             try:
                 ap = aDTNPacket(key=key)
                 ap.dissect(payload)
-                msg = ap.payload.payload.load
+                msg = ap.payload.payload.load.decode('utf-8')
                 logging.debug("Decrypted with key {}".format(b2s(key)[:6]))
                 logging.debug("Received msg: {}".format(msg))
-                self.ms.add_message(b2s(msg))
+                self.ms.add_message(msg)
                 return
             except CryptoError:
                 pass
