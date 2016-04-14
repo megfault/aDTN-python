@@ -36,6 +36,12 @@ def decrypt(encrypted, key):
     return SecretBox(key).decrypt(encrypted)
 
 
+def b2s(bytes):
+    return binascii.hexlify(bytes).decode('utf-8')
+
+def s2b(string):
+    return binascii.unhexlify(string.encode('utf-8'))
+
 class aDTN():
     def __init__(self, batch_size, sending_freq, creation_rate, name, wireless_interface):
         self.batch_size = batch_size
@@ -59,7 +65,7 @@ class aDTN():
                 for key in self.km.keys.values():
                     pkt = (aDTNPacket(key=key) / aDTNInnerPacket() / message)
                     self.sending_pool.append(pkt)
-                    logging.debug("Encrypted using key {}".format(binascii.hexlify(key).decode('utf-8')[:6]))
+                    logging.debug("Encrypted using key {}".format(b2s(key)[:6]))
             while len(self.sending_pool) < self.batch_size:
                 fake_key = self.km.get_fake_key()
                 self.sending_pool.append((aDTNPacket(key=fake_key) / aDTNInnerPacket()))
@@ -76,7 +82,7 @@ class aDTN():
 
     def process(self, aDTN_packet):
         for key in self.km.keys.values():
-            logging.debug("Attempting to decrypt with key {}".format(binascii.hexlify(key).decode('utf8')[:6]))
+            logging.debug("Attempting to decrypt with key {}".format(b2s(key)[:6]))
             try:
                 ap = aDTNPacket(key=key)
                 ap.dissect(aDTN_packet.build())
@@ -128,8 +134,7 @@ class KeyManager():
             file_path = path.joinpath(key_id + ".key")
             if not file_path.exists():
                 key = self.keys[key_id]
-                hx = binascii.hexlify(key)
-                s = hx.decode('utf-8')
+                s = b2s(key)
                 with file_path.open('w', encoding='utf-8') as f:
                     f.write(s)
 
@@ -139,8 +144,7 @@ class KeyManager():
             if file_path.suffix == ".key":
                 with file_path.open('r', encoding='utf-8') as f:
                     s = f.readline()
-                hx = s.encode('utf-8')
-                key = binascii.unhexlify(hx)
+                key = s2b(s)
                 self.keys[file_path.stem] = key
 
 
