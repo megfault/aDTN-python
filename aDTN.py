@@ -6,7 +6,8 @@ from nacl.exceptions import CryptoError
 from pathlib import Path
 import binascii
 from scapy.all import Ether, Packet, LenField, sendp, sniff, bind_layers
-import sqlite3
+from tinydb import TinyDB, Query
+from tinydb.operations import increment
 import time
 import sched
 from threading import RLock, Thread
@@ -16,7 +17,7 @@ import logging
 
 DEFAULT_DIR = "data/"
 KEYS_DIR = "keys/"
-DATABASE_FN = "messagestore.db"
+DATABASE_FN = "messagestore.json"
 PACKET_SIZE = 1500
 MAX_INNER_SIZE = 1466
 
@@ -227,12 +228,10 @@ class MessageStore():
     def __init__(self, size_threshold=None):
         self.size_threshold = size_threshold
         self.message_count = 0
-        conn = sqlite3.connect(DEFAULT_DIR + DATABASE_FN)
-        cursor = conn.cursor()
-        cursor.execute("DELETE FROM stats;")
-        cursor.execute("DELETE FROM message;")
-        conn.commit()
-        conn.close()
+        self.db = TinyDB(DEFAULT_DIR + DATABASE_FN)
+        self.db.purge()
+        self.stats = self.db.table('stats')
+        self.messages = self.db.table('messages')
         self.lock = RLock()
 
     def add_message(self, message):
@@ -240,58 +239,39 @@ class MessageStore():
         h = nacl.hash.sha256(bytes, nacl.encoding.HexEncoder)
         idx = h.decode('utf-8')
         with self.lock:
-            conn = sqlite3.connect(DEFAULT_DIR + DATABASE_FN)
-            cursor = conn.cursor()
-            cursor.execute("SELECT * FROM stats WHERE hash=?;", [idx])
-            res = cursor.fetchall()
+            Stats = Query()
+            res = self.stats.search(Stats.hash == idx)
             now = int(time.time())
             if len(res) == 0:
                 # new message
-                cursor.execute("INSERT INTO stats VALUES (?, ?, ?, ?, ?, ?, ?)", [idx, now, None, None, 0, 0, None])
-                cursor.execute("INSERT INTO message VALUES (?, ?)", [idx, message])
+                self.stats.insert({'hash': idx,
+                                   'first_seen': now,
+                                   'receive_count': 0,
+                                   'send_count': 0,
+                                   'last_received': None,
+                                   'last_sent': None,
+                                   'deleted': False})
+                self.messages.insert({'hash': idx, 'content': message})
                 logging.debug("message inserted: {}".format(message))
                 self.message_count += 1
             else:
-                h, first_seen, last_rcv, last_sent, rcv_ct, snd_ct, deleted = res[0]
-                logging.debug("data to update: {}, {}, {}".format(now, rcv_ct, idx))
-                cursor.execute("UPDATE stats SET last_rcv=?, snd_ct=? WHERE hash=?", [now, rcv_ct + 1, idx])
-            conn.commit()
-            conn.close()
-        if self.size_threshold is not None and self.message_count > self.size_threshold:
-            self.purge(10)
-
-    def purge(self, count):
-        with self.lock:
-            conn = sqlite3.connect(DEFAULT_DIR + DATABASE_FN)
-            cursor = conn.cursor()
-            cursor.execute("SELECT hash FROM stats ORDER BY rcv_ct DESC, snd_ct DESC, last_rcv DESC")
-            res = cursor.fetchmany(count)
-            now = int(time.time())
-            for r in res:
-                idx = r[0]
-                cursor.execute("DELETE FROM message WHERE hash=?", [idx])
-                cursor.execute("UPDATE stats SET deleted=? WHERE hash=?", [now, idx])
-            conn.commit()
-            conn.close()
+                # message already in database
+                self.stats.update({'last_received': now}, 'hash' == idx)
+                self.stats.update(increment('receive_count'), 'hash' == idx)
 
     def get_messages(self, count=1):
         with self.lock:
-            conn = sqlite3.connect(DEFAULT_DIR + DATABASE_FN)
-            cursor = conn.cursor()
-            cursor.execute("SELECT hash FROM stats ORDER BY rcv_ct ASC, snd_ct ASC, last_snt ASC")
-            res = cursor.fetchmany(count)
+            stats = self.stats.all()
+            res = sorted(stats, key=lambda x: (x['receive_count'], x['send_count'], x['last_sent']))[:10]
             now = int(time.time())
             messages = []
             for r in res:
-                idx = r[0]
-                cursor.execute("SELECT content FROM message WHERE hash=?", [idx])
-                msg = cursor.fetchone()[0]
+                idx = r['hash']
+                Messages = Query()
+                msg = self.messages.search(Messages.hash == idx)[0]
                 messages.append(msg)
-                cursor.execute("SELECT snd_ct FROM stats WHERE hash=?", [idx])
-                snd_ct = cursor.fetchone()[0]
-                cursor.execute("UPDATE stats SET last_snt=?, snd_ct=? WHERE hash=?", [now, snd_ct + 1, idx])
-            conn.commit()
-            conn.close()
+                self.stats.update({'last_sent': now}, 'hash' == idx)
+                self.stats.update(increment('send_count'), 'hash' == idx)
         return messages
 
 
