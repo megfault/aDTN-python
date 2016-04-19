@@ -12,7 +12,6 @@ from utils import log
 class MessageStore():
     def __init__(self, size_threshold=None):
         self.size_threshold = size_threshold
-        self.message_count = 0
         self.db = TinyDB(DEFAULT_DIR + DATABASE_FN)
         self.db.purge()
         self.stats = self.db.table('stats')
@@ -40,7 +39,6 @@ class MessageStore():
             if len(res) == 0:
                 self.create_new_message(message, idx, now)
                 log("message inserted: {}".format(message))
-                self.message_count += 1
             else:
                 self.stats.update({'last_received': now}, 'hash' == idx)
                 self.stats.update(increment('receive_count'), 'hash' == idx)
