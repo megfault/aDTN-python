@@ -19,6 +19,16 @@ class MessageStore():
         self.messages = self.db.table('messages')
         self.lock = RLock()
 
+    def create_new_message(self, message, hash, time):
+        self.messages.insert({'hash': hash, 'content': message})
+        self.stats.insert({'hash': hash,
+                           'first_seen': time,
+                           'receive_count': 0,
+                           'send_count': 0,
+                           'last_received': None,
+                           'last_sent': None,
+                           'deleted': False})
+
     def add_message(self, message):
         bytes = message.encode('utf-8')
         h = sha256(bytes, HexEncoder)
@@ -28,19 +38,10 @@ class MessageStore():
             res = self.stats.search(Stats.hash == idx)
             now = int(time.time())
             if len(res) == 0:
-                # new message
-                self.stats.insert({'hash': idx,
-                                   'first_seen': now,
-                                   'receive_count': 0,
-                                   'send_count': 0,
-                                   'last_received': None,
-                                   'last_sent': None,
-                                   'deleted': False})
-                self.messages.insert({'hash': idx, 'content': message})
+                self.create_new_message(message, idx, now)
                 log("message inserted: {}".format(message))
                 self.message_count += 1
             else:
-                # message already in database
                 self.stats.update({'last_received': now}, 'hash' == idx)
                 self.stats.update(increment('receive_count'), 'hash' == idx)
 
