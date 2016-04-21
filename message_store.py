@@ -28,10 +28,10 @@ class MessageStore():
 
     def add_message(self, message):
         idx = hash_string(message)
+        now = int(time.time())
         with self.lock:
             Stats = Query()
             res = self.stats.search(Stats.idx == idx)
-            now = int(time.time())
             if len(res) == 0:
                 self.create_new_message(message, idx, now)
                 log("message inserted: {}".format(message))
