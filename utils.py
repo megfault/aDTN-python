@@ -1,6 +1,8 @@
 from binascii import hexlify, unhexlify
 from nacl.utils import random as rand
 from nacl.secret import SecretBox
+from nacl.hash import sha256
+from nacl.encoding import HexEncoder
 from logging import basicConfig, debug, DEBUG
 
 basicConfig(filename='aDTN.log', level=DEBUG,
@@ -20,6 +22,10 @@ def encrypt(message, key, nonce_generator=generate_iv):
 def decrypt(encrypted, key):
     return SecretBox(key).decrypt(encrypted)
 
+def hash_string(s):
+    bytes = s.encode('utf-8')
+    h = sha256(bytes, HexEncoder)
+    return h.decode('utf-8')
 
 def b2s(b):
     return hexlify(b).decode('utf-8')
