@@ -1,4 +1,3 @@
-
 DEFAULT_DIR = "data/"
 KEYS_DIR = "keys/"
 DATABASE_FN = "message_store.json"

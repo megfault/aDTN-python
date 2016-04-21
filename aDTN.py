@@ -13,8 +13,6 @@ from aDTN_packet import aDTNPacket, aDTNInnerPacket
 from utils import b2s
 
 
-
-
 class aDTN():
     def __init__(self, batch_size, sending_freq, creation_rate, name, wireless_interface):
         self.batch_size = batch_size
@@ -66,6 +64,7 @@ class aDTN():
                 return
             except CryptoError:
                 pass
+
     def writing_interval(self):
         return abs(random.gauss(self.creation_rate, self.creation_rate / 4))
 
@@ -81,7 +80,6 @@ class aDTN():
                                              "filter": "ether proto 0xcafe"})
         t_snd.start()
         t_rcv.start()
-
 
 
 if __name__ == "__main__":

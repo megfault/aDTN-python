@@ -7,6 +7,7 @@ from nacl.encoding import HexEncoder
 from utils import b2s, s2b
 from settings import DEFAULT_DIR, KEYS_DIR
 
+
 class KeyManager():
     def __init__(self):
         self.keys = dict()
