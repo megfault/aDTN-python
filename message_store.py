@@ -1,12 +1,10 @@
 from tinydb import TinyDB, Query
 from tinydb.operations import increment
-from nacl.hash import sha256
-from nacl.encoding import HexEncoder
 import time
 from threading import RLock
 
 from settings import DEFAULT_DIR, DATABASE_FN
-from utils import log
+from utils import log, hash_string
 
 
 class MessageStore():
@@ -19,8 +17,8 @@ class MessageStore():
         self.lock = RLock()
 
     def create_new_message(self, message, hash, time):
-        self.messages.insert({'hash': hash, 'content': message})
-        self.stats.insert({'hash': hash,
+        self.messages.insert({'idx': hash, 'content': message})
+        self.stats.insert({'idx': hash,
                            'first_seen': time,
                            'receive_count': 0,
                            'send_count': 0,
@@ -29,19 +27,17 @@ class MessageStore():
                            'deleted': False})
 
     def add_message(self, message):
-        bytes = message.encode('utf-8')
-        h = sha256(bytes, HexEncoder)
-        idx = h.decode('utf-8')
+        idx = hash_string(message)
         with self.lock:
             Stats = Query()
-            res = self.stats.search(Stats.hash == idx)
+            res = self.stats.search(Stats.idx == idx)
             now = int(time.time())
             if len(res) == 0:
                 self.create_new_message(message, idx, now)
                 log("message inserted: {}".format(message))
             else:
-                self.stats.update({'last_received': now}, 'hash' == idx)
-                self.stats.update(increment('receive_count'), 'hash' == idx)
+                self.stats.update({'last_received': now}, Stats.idx == idx)
+                self.stats.update(increment('receive_count'), Stats.idx == idx)
 
     def get_messages(self, count=1):
         with self.lock:
@@ -50,10 +46,10 @@ class MessageStore():
             now = int(time.time())
             messages = []
             for r in res:
-                idx = r['hash']
+                idx = r['idx']
                 Messages = Query()
-                msg = self.messages.search(Messages.hash == idx)[0]
+                msg = self.messages.search(Messages.idx == idx)[0]['content']
                 messages.append(msg)
-                self.stats.update({'last_sent': now}, 'hash' == idx)
-                self.stats.update(increment('send_count'), 'hash' == idx)
+                self.stats.update({'last_sent': now}, Messages.idx == idx)
+                self.stats.update(increment('send_count'), Messages.idx == idx)
         return messages
