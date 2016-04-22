@@ -28,6 +28,8 @@ Go to the directory with the code and run:
 
 Replace `<key_name>` with something you can remember. This will create one key and place it in the data/keys/ directory, with the name `<key_name>.key`. Then share the key with a friend - they should store it in the same directory and use the same network configuration (ESSID, channel) as you.
 
+If you leave out `-n <key_name>` the name of the key will be the first few characters of the key's hash.
+
 ### Sending messages
 
 To send a message run:
