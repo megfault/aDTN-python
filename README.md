@@ -44,11 +44,11 @@ To show all the messages in your message store (both all sent and received messa
 
     python3 message_store.py -a
 
-This will list the ID of the message followed by the message itself.
+This will list the ID of each message followed by the message itself.
 
 ### Deleting messages
 
-If you want to delete a message - and prevent your device from spreading it further across the network - do:
+If you want to delete a message - and prevent your device from spreading it further in the network - do:
 
     python3 message_store.py -d <ID>
 
