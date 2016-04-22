@@ -10,7 +10,7 @@ Planned are further services that run on top of aDTN, such as a more controlled 
 
 This application broadcasts aDTN packets inside Ethernet frames over the wireless medium. To allow that, you first must set your wireless card to IBSS mode (also known as ad-hoc mode). This means it will not connect to an access point, so you will be disconnected from the Internet (*gasp*!) but you will be able to directly exchange data with other devices running aDTN wherever you are. Then set the ESSID to `aDTN` and choose a channel. It is important that everyone on the same network agrees on a channel, so I suggest you choose channel 1 (2432MHz) unless your community decides otherwise.
 
-On a Linux system, you need to disable your network manager, wpa_supplicant and the like. Then execute the following as root (replace <iface> with the name of your wireless interface):
+On a Linux system, you need to disable your network manager, wpa_supplicant and the like. Then execute the following as root, replacing `<iface>` with your wireless interface name:
 
     iw dev <iface> set type ibss
     ip l s up <iface>
