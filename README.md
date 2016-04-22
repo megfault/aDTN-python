@@ -20,7 +20,7 @@ Some wireless cards seem to reset the ESSID after the laptop has been suspended,
 
 ### Creating keys
 
-Before you can use aDTN you need to create some keys. They are used to encrypt the data between you and your friends (i.e. people you trust) and to anonymize your traffic. If you do not have any keys you are not able to receive any messages, because aDTN is a friend-to-friend protocol.
+Before you can use aDTN you need to set up encryption keys. They are used to enforce that you can only exchange data with your "friends" (i.e. people you trust) and to anonymize your traffic. If you do not have any keys you are not able to receive nor send any messages, because aDTN is a friend-to-friend protocol.
 
 Go to the directory with the code and run:
 
