@@ -46,7 +46,8 @@ class MessageStore():
 
     def get_messages(self, count=1):
         with self.lock:
-            stats = self.stats.all()
+            Stats = Query()
+            stats = self.stats.search(Stats.deleted == False)
             res = sorted(stats, key=lambda x: (x['receive_count'], x['send_count'], x['last_sent']))[:10]
             now = int(time.time())
             messages = []
