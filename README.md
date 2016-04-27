@@ -24,11 +24,10 @@ Before you can use aDTN you need to set up encryption keys. They are used to enf
 
 Go to the directory with the code and run:
 
-    python3 key_manager.py -c -n <key_name>
+    python3 key_manager.py -c <filename>
 
-Replace `<key_name>` with something you can remember. This will create one key and place it in the data/keys/ directory, with the name `<key_name>.key`. Then share the key with a friend - they should store it in the same directory and use the same network configuration (ESSID, channel) as you.
+Replace `<filename>` with something you can remember. This will create one key and place it in the data/keys/ directory, with the name `<key_name>.key`. Then share the key with a friend - they should store it in the same directory and use the same network configuration (ESSID, channel) to be able to exchange messages with you.
 
-If you leave out `-n <key_name>` the name of the key will be the first few characters of the key's hash.
 
 ### Sending messages
 
