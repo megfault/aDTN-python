@@ -36,7 +36,7 @@ class aDTNPacket(Packet):
     def extract_padding(self, s):
         if self.auto_encrypt and self.key is not None:
             return decrypt(s, self.key), None
-        return s
+        return s, None
 
     def clone_attrs(self, clone):
         # TODO clone all keys
