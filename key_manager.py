@@ -3,6 +3,7 @@ from nacl.secret import SecretBox
 from nacl.utils import random
 from nacl.hash import sha256
 from nacl.encoding import HexEncoder
+from argparse import ArgumentParser
 
 from utils import b2s, s2b
 from settings import DEFAULT_DIR, KEYS_DIR
@@ -45,3 +46,11 @@ class KeyManager():
                     s = f.readline()
                 key = s2b(s)
                 self.keys[file_path.stem] = key
+
+if __name__ == '__main__':
+    parser = ArgumentParser(description='Manage aDTN keys')
+    parser.add_argument('-c', metavar="filename", type=str, dest="key_name", default=None, help='create a key and store it in <filename>.key in the keys directory')
+    args = parser.parse_args()
+    if args.key_name is not None:
+        km = KeyManager()
+        km.create_key(args.key_name)
