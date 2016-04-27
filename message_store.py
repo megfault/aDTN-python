@@ -4,6 +4,7 @@ import time
 from threading import RLock
 from argparse import ArgumentParser
 
+
 from settings import DEFAULT_DIR, DATABASE_FN
 from utils import log, hash_string
 
@@ -37,8 +38,12 @@ class MessageStore():
                 self.create_new_message(message, idx, now)
                 log("message inserted: {}".format(message))
             else:
-                self.stats.update({'last_received': now}, Stats.idx == idx)
-                self.stats.update(increment('receive_count'), Stats.idx == idx)
+                deleted = res[0]['deleted']
+                if deleted:
+                    log("Received deleted message: {}".format(message))
+                else:
+                    self.stats.update({'last_received': now}, Stats.idx == idx)
+                    self.stats.update(increment('receive_count'), Stats.idx == idx)
 
     def get_messages(self, count=1):
         with self.lock:
@@ -55,12 +60,38 @@ class MessageStore():
                 self.stats.update(increment('send_count'), Messages.idx == idx)
         return messages
 
+    def delete_message(self, msg_id):
+        with self.lock:
+            Stats = Query()
+            Message = Query()
+            res = self.stats.search(Stats.idx == msg_id)
+            self.stats.update({'deleted': True}, Stats.idx == msg_id)
+            record = self.messages.get(Message.idx == msg_id)
+            if record is not None:
+                self.messages.remove(eids=[record.eid])
+            else:
+                log("No message to delete: {}".format(msg_id))
+
+    def print_messages(self):
+        msgs = ms.messages.all()
+        for msg in msgs:
+            print("{}\t{}".format(msg['idx'], msg['content']))
 
 
 if __name__ == '__main__':
     parser = ArgumentParser(description='Manage aDTN messages')
     parser.add_argument('-c', metavar="message", type=str, dest="message", default=None, help='create a message and add it to the message store for later sending')
+    parser.add_argument('-a', type=bool, dest="display", nargs="?", const=True, default=False, help='display all messages')
+    parser.add_argument('-d', metavar="message_id", type=str, dest="to_delete", default=None, help='delete message with id <message_id>')
     args = parser.parse_args()
+
+    ms = MessageStore()
+
     if args.message is not None:
-        ms = MessageStore()
         ms.add_message(args.message)
+
+    if args.to_delete is not None:
+        ms.delete_message(args.to_delete)
+
+    if args.display:
+        ms.print_messages()
