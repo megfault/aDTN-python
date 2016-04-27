@@ -100,7 +100,7 @@ if __name__ == '__main__':
         ms.delete_message(args.to_delete)
 
     if args.all:
-       ms.print_messages()
+        ms.print_messages()
 
     if args.wipe:
         ms.wipe()
