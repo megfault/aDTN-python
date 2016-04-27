@@ -3,7 +3,7 @@ from scapy.all import Packet, LenField
 
 
 class aDTNPacket(Packet):
-    def __init__(self, *args, key=None, nonce=None, auto_encrypt=True, **kwargs):
+    def __init__(self, *args, key=None, auto_encrypt=True, **kwargs):
         self.key = key
         self.auto_encrypt = auto_encrypt
         super().__init__(*args, **kwargs)
