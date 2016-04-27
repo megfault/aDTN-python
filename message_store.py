@@ -13,7 +13,6 @@ class MessageStore():
     def __init__(self, size_threshold=None):
         self.size_threshold = size_threshold
         self.db = TinyDB(DEFAULT_DIR + DATABASE_FN)
-        self.db.purge()
         self.stats = self.db.table('stats')
         self.messages = self.db.table('messages')
         self.lock = RLock()
@@ -77,11 +76,17 @@ class MessageStore():
         for msg in msgs:
             print("{}\t{}".format(msg['idx'], msg['content']))
 
+    def wipe(self):
+        self.stats.purge()
+        self.messages.purge()
+        self.db.purge()
+
 
 if __name__ == '__main__':
     parser = ArgumentParser(description='Manage aDTN messages')
     parser.add_argument('-c', metavar="message", type=str, dest="message", default=None, help='create a message and add it to the message store for later sending')
-    parser.add_argument('-a', type=bool, dest="display", nargs="?", const=True, default=False, help='display all messages')
+    parser.add_argument('-a', '--all', action="store_true", help='display all messages')
+    parser.add_argument('-w', '--wipe', action="store_true", help='wipe all messages and stats')
     parser.add_argument('-d', metavar="message_id", type=str, dest="to_delete", default=None, help='delete message with id <message_id>')
     args = parser.parse_args()
 
@@ -93,5 +98,8 @@ if __name__ == '__main__':
     if args.to_delete is not None:
         ms.delete_message(args.to_delete)
 
-    if args.display:
-        ms.print_messages()
+    if args.all:
+       ms.print_messages()
+
+    if args.wipe:
+        ms.wipe()
