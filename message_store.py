@@ -2,6 +2,7 @@ from tinydb import TinyDB, Query
 from tinydb.operations import increment
 import time
 from threading import RLock
+from argparse import ArgumentParser
 
 from settings import DEFAULT_DIR, DATABASE_FN
 from utils import log, hash_string
@@ -53,3 +54,13 @@ class MessageStore():
                 self.stats.update({'last_sent': now}, Messages.idx == idx)
                 self.stats.update(increment('send_count'), Messages.idx == idx)
         return messages
+
+
+
+if __name__ == '__main__':
+    parser = ArgumentParser(description='Manage aDTN messages')
+    parser.add_argument('-c', metavar="message", type=str, dest="message", default=None, help='create a message and add it to the message store for later sending')
+    args = parser.parse_args()
+    if args.message is not None:
+        ms = MessageStore()
+        ms.add_message(args.message)
