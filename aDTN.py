@@ -4,7 +4,7 @@ import time
 import sched
 from threading import Thread
 import random
-import argparse
+from argparse import ArgumentParser
 import logging
 
 from message_store import MessageStore
@@ -77,13 +77,14 @@ class aDTN():
         t_snd = Thread(target=self.scheduler.run, kwargs={"blocking": True})
         t_rcv = Thread(target=sniff, kwargs={"iface": self.wireless_interface,
                                              "prn": lambda p: self.process(p),
-                                             "filter": "ether proto 0xcafe"})
+                                             "filter": "ether proto 0xcafe",
+                                             "store": 0})
         t_snd.start()
         t_rcv.start()
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description='Run an aDTN simulation instance.')
+    parser = ArgumentParser(description='Run an aDTN simulation instance.')
     parser.add_argument('batch_size', type=int, help='how many messages to send in a batch')  # 10
     parser.add_argument('sending_freq', type=int, help='interval (in s) between sending a batch')  # 30
     parser.add_argument('creation_rate', type=int, help='avg interval between creating a new message')  # 4*3600 = 14400
