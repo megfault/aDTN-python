@@ -14,14 +14,19 @@ from utils import b2s
 
 
 class aDTN():
-    def __init__(self, batch_size, sending_freq, creation_rate, name, wireless_interface):
+    '''
+    Receives and sends aDTN packets.
+    Keys used for encrypting and decrypting the packets are stored in a KeyManager.
+    Received payload is stored in a MessageStore instance.
+    '''
+    def __init__(self, batch_size, sending_freq, creation_rate, name, wireless_interface, data_store):
         self.batch_size = batch_size
         self.sending_freq = sending_freq
         self.creation_rate = creation_rate
         self.device_name = name
         self.wireless_interface = wireless_interface
         self.km = KeyManager()
-        self.ms = MessageStore()
+        self.ms = MessageStore(data_store)
         self.sending_pool = []
         self.prepare_sending_pool()
         self.next_message = 0
@@ -90,9 +95,11 @@ if __name__ == "__main__":
     parser.add_argument('creation_rate', type=int, help='avg interval between creating a new message')  # 4*3600 = 14400
     parser.add_argument('device_name', type=str, help='name of this device')  # maxwell
     parser.add_argument('wireless_interface', type=str, help='name of the wireless interface')
+    parser.add_argument('data_store', type=str, help='filename of database for network messages')
     args = parser.parse_args()
 
     bind_layers(aDTNPacket, aDTNInnerPacket)
     bind_layers(Ether, aDTNPacket, type=0xcafe)
-    adtn = aDTN(args.batch_size, args.sending_freq, args.creation_rate, args.device_name, args.wireless_interface)
+    adtn = aDTN(args.batch_size, args.sending_freq, args.creation_rate, args.device_name, args.wireless_interface,
+                args.data_store)
     adtn.run()

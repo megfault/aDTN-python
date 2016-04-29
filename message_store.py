@@ -5,14 +5,14 @@ from threading import RLock
 from argparse import ArgumentParser
 
 
-from settings import DEFAULT_DIR, DATABASE_FN
+from settings import DEFAULT_DIR, DEFAULT_DATABASE_FN
 from utils import log, hash_string
 
 
 class MessageStore():
-    def __init__(self, size_threshold=None):
+    def __init__(self, size_threshold=None, db_filename=DEFAULT_DATABASE_FN):
         self.size_threshold = size_threshold
-        self.db = TinyDB(DEFAULT_DIR + DATABASE_FN)
+        self.db = TinyDB(DEFAULT_DIR + db_filename)
         self.stats = self.db.table('stats')
         self.messages = self.db.table('messages')
         self.lock = RLock()
