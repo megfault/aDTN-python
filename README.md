@@ -35,7 +35,7 @@ To send a message run:
 
     python3 message_store.py -c "<message>"
 
-Replace `<message>` with whatever text you want to send. Make sure to use quotation marks.
+Replace `<message>` with whatever text you want to send. Make sure to use quotation marks. Note: the message may not be sent right away.
 
 The payload of an aDTN packet is limited to 1460 bytes, so do not write a novel. But it will be able to fit up to the size of 10 tweets if your encoding uses 1 byte per character; worst case scenario a bit more than 2 tweets.
 
