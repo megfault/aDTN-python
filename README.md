@@ -1,5 +1,5 @@
 
-This is a work-in-progress, experimental Python implementation of aDTN, a network layer protocol for anonymous wireless delay-tolerant networking.
+This is a work-in-progress, experimental Python 3 implementation of aDTN, a network layer protocol for anonymous wireless delay-tolerant networking.
 
 On top of it is a simple mechanism to flood messages all over the network. It can be viewed as a propaganda-spreading automated system that hides the source of the content.
 
