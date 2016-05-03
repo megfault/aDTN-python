@@ -82,14 +82,16 @@ class MessageStore():
         self.messages.purge()
         self.db.purge()
 
-
-if __name__ == '__main__':
+def parse_args():
     parser = ArgumentParser(description='Manage aDTN messages')
     parser.add_argument('-c', metavar="message", type=str, dest="message", default=None, help='create a message and add it to the message store for later sending')
     parser.add_argument('-a', '--all', action="store_true", help='display all messages')
     parser.add_argument('-w', '--wipe', action="store_true", help='wipe all messages and stats')
     parser.add_argument('-d', metavar="message_id", type=str, dest="to_delete", default=None, help='delete message with id <message_id>')
-    args = parser.parse_args()
+    return parser.parse_args()
+
+if __name__ == '__main__':
+    args = parse_args()
 
     ms = MessageStore()
 

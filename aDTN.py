@@ -87,8 +87,7 @@ class aDTN():
         t_snd.start()
         t_rcv.start()
 
-
-if __name__ == "__main__":
+def parse_args():
     parser = ArgumentParser(description='Run an aDTN simulation instance.')
     parser.add_argument('batch_size', type=int, help='how many messages to send in a batch')  # 10
     parser.add_argument('sending_freq', type=int, help='interval (in s) between sending a batch')  # 30
@@ -96,7 +95,11 @@ if __name__ == "__main__":
     parser.add_argument('device_name', type=str, help='name of this device')  # maxwell
     parser.add_argument('wireless_interface', type=str, help='name of the wireless interface')
     parser.add_argument('data_store', type=str, help='filename of database for network messages')
-    args = parser.parse_args()
+    return parser.parse_args()
+
+
+if __name__ == "__main__":
+    args = parse_args()
 
     bind_layers(aDTNPacket, aDTNInnerPacket)
     bind_layers(Ether, aDTNPacket, type=0xcafe)

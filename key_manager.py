@@ -47,10 +47,13 @@ class KeyManager():
                 key = s2b(s)
                 self.keys[file_path.stem] = key
 
-if __name__ == '__main__':
+def parse_args():
     parser = ArgumentParser(description='Manage aDTN keys')
     parser.add_argument('-c', metavar="filename", type=str, dest="key_name", default=None, help='create a key and store it in <filename>.key in the keys directory')
-    args = parser.parse_args()
+    return parser.parse_args()
+
+if __name__ == '__main__':
+    args = parse_args()
     if args.key_name is not None:
         km = KeyManager()
         km.create_key(args.key_name)
