@@ -3,8 +3,8 @@ from scapy.all import Ether, sendp, sniff, bind_layers
 import time
 import sched
 from threading import Thread
-import random
 from argparse import ArgumentParser
+from random import sample
 import logging
 
 from message_store import MessageStore
@@ -19,11 +19,9 @@ class aDTN():
     Keys used for encrypting and decrypting the packets are stored in a KeyManager.
     Received payload is stored in a MessageStore instance.
     '''
-    def __init__(self, batch_size, sending_freq, creation_rate, name, wireless_interface, data_store):
+    def __init__(self, batch_size, sending_freq, wireless_interface, data_store):
         self.batch_size = batch_size
         self.sending_freq = sending_freq
-        self.creation_rate = creation_rate
-        self.device_name = name
         self.wireless_interface = wireless_interface
         self.km = KeyManager()
         self.ms = MessageStore(data_store)
@@ -31,7 +29,6 @@ class aDTN():
         self.prepare_sending_pool()
         self.next_message = 0
         self.scheduler = sched.scheduler(time.time, time.sleep)
-        self.scheduler.enter(self.writing_interval(), 2, self.write_message)
         self.scheduler.enter(self.sending_freq, 1, self.send)
 
     def prepare_sending_pool(self):
@@ -48,8 +45,8 @@ class aDTN():
     def send(self):
         self.scheduler.enter(self.sending_freq, 1, self.send)
         batch = []
-        sample = random.sample(self.sending_pool, self.batch_size)
-        for pkt in sample:
+        s = sample(self.sending_pool, self.batch_size)
+        for pkt in s:
             batch.append(Ether(dst="ff:ff:ff:ff:ff:ff", type=0xcafe) / pkt)
             self.sending_pool.remove(pkt)
         sendp(batch, iface=self.wireless_interface)
@@ -70,14 +67,6 @@ class aDTN():
             except CryptoError:
                 pass
 
-    def writing_interval(self):
-        return abs(random.gauss(self.creation_rate, self.creation_rate / 4))
-
-    def write_message(self):
-        self.scheduler.enter(self.writing_interval(), 2, self.write_message)
-        self.ms.add_message(self.device_name + str(self.next_message))
-        self.next_message += 1
-
     def run(self):
         t_snd = Thread(target=self.scheduler.run, kwargs={"blocking": True})
         t_rcv = Thread(target=sniff, kwargs={"iface": self.wireless_interface,
@@ -91,8 +80,6 @@ def parse_args():
     parser = ArgumentParser(description='Run an aDTN simulation instance.')
     parser.add_argument('batch_size', type=int, help='how many messages to send in a batch')
     parser.add_argument('sending_freq', type=int, help='interval (in s) between sending a batch')
-    parser.add_argument('creation_rate', type=int, help='avg interval between creating a new message')
-    parser.add_argument('device_name', type=str, help='name of this device')
     parser.add_argument('wireless_interface', type=str, help='name of the wireless interface')
     parser.add_argument('data_store', type=str, help='filename of database for network messages')
     return parser.parse_args()
@@ -103,6 +90,6 @@ if __name__ == "__main__":
 
     bind_layers(aDTNPacket, aDTNInnerPacket)
     bind_layers(Ether, aDTNPacket, type=0xcafe)
-    adtn = aDTN(args.batch_size, args.sending_freq, args.creation_rate, args.device_name, args.wireless_interface,
+    adtn = aDTN(args.batch_size, args.sending_freq, args.wireless_interface,
                 args.data_store)
     adtn.run()
