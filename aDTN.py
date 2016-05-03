@@ -89,10 +89,10 @@ class aDTN():
 
 def parse_args():
     parser = ArgumentParser(description='Run an aDTN simulation instance.')
-    parser.add_argument('batch_size', type=int, help='how many messages to send in a batch')  # 10
-    parser.add_argument('sending_freq', type=int, help='interval (in s) between sending a batch')  # 30
-    parser.add_argument('creation_rate', type=int, help='avg interval between creating a new message')  # 4*3600 = 14400
-    parser.add_argument('device_name', type=str, help='name of this device')  # maxwell
+    parser.add_argument('batch_size', type=int, help='how many messages to send in a batch')
+    parser.add_argument('sending_freq', type=int, help='interval (in s) between sending a batch')
+    parser.add_argument('creation_rate', type=int, help='avg interval between creating a new message')
+    parser.add_argument('device_name', type=str, help='name of this device')
     parser.add_argument('wireless_interface', type=str, help='name of the wireless interface')
     parser.add_argument('data_store', type=str, help='filename of database for network messages')
     return parser.parse_args()
