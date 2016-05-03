@@ -28,6 +28,20 @@ Go to the directory with the code and run:
 
 Replace `<filename>` with something you can remember. This will create one key and place it in the data/keys/ directory, with the name `<key_name>.key`. Then share the key with a friend - they should store it in the same directory and use the same network configuration (ESSID, channel) to be able to exchange messages with you.
 
+### Running aDTN
+
+To run the aDTN node, execute:
+    
+    python3 aDTN.py <bs> <sf> <iface> <data_store>
+    
+A brief explanation of the arguments:
+
+* `<bs>`: batch size, the number of packets you want to send in each batch
+* `<sf>`: the interval, in seconds, between sending two batches
+* `<iface>`: the wireless interface you have set up for running in ICSS mode
+* `<data_store>`: the name of the database file where to store the aDTN traffic (in the `data/` directory)
+
+What will happen now: every `<sf>` seconds, your aDTN node will send `<bs>` packets it has in the sending pool. The sending pool is refilled automatically with encrypted versions of the stored messages that most "deserve" to be broadcast next. If you are curious, the heuristic is to retransmit first the messages that have been received the least number of times. In case of a tie, then those that have been sent the least number of times are broadcast first, and finally those that have been not been sent for the longest time.
 
 ### Sending messages
 
@@ -35,7 +49,9 @@ To send a message run:
 
     python3 message_store.py -c "<message>"
 
-Replace `<message>` with whatever text you want to send. Make sure to use quotation marks. Note: the message may not be sent right away.
+Replace `<message>` with whatever text you want to send. Make sure to use quotation marks.
+
+Note: When you send a message, you are not sending it immediately, but you are simply storing it on the message store. Following the heuristic described in the last section, your message is a strong candidate for the next sending pool refill, as it has never been received (unless you are creating a message that is equal in content to some existing message - which would be pointless, right?).
 
 The payload of an aDTN packet is limited to 1460 bytes, so do not write a novel. But it will be able to fit up to the size of 10 tweets if your encoding uses 1 byte per character; worst case scenario a bit more than 2 tweets.
 
