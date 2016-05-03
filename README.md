@@ -39,7 +39,6 @@ A brief explanation of the arguments:
 * `<bs>`: batch size, the number of packets you want to send in each batch
 * `<sf>`: the interval, in seconds, between sending two batches
 * `<iface>`: the wireless interface you have set up for running in ICSS mode
-* `<data_store>`: the name of the database file where to store the aDTN traffic (in the `data/` directory)
 
 What will happen now: every `<sf>` seconds, your aDTN node will send `<bs>` packets it has in the sending pool. The sending pool is refilled automatically with encrypted versions of the stored messages that most "deserve" to be broadcast next. If you are curious, the heuristic is to retransmit first the messages that have been received the least number of times. In case of a tie, then those that have been sent the least number of times are broadcast first, and finally those that have been not been sent for the longest time.
 
