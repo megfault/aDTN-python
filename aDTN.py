@@ -19,12 +19,12 @@ class aDTN():
     Keys used for encrypting and decrypting the packets are stored in a KeyManager.
     Received payload is stored in a MessageStore instance.
     '''
-    def __init__(self, batch_size, sending_freq, wireless_interface, data_store):
+    def __init__(self, batch_size, sending_freq, wireless_interface):
         self.batch_size = batch_size
         self.sending_freq = sending_freq
         self.wireless_interface = wireless_interface
         self.km = KeyManager()
-        self.ms = MessageStore(data_store)
+        self.ms = MessageStore()
         self.sending_pool = []
         self.prepare_sending_pool()
         self.next_message = 0
@@ -81,7 +81,6 @@ def parse_args():
     parser.add_argument('batch_size', type=int, help='how many messages to send in a batch')
     parser.add_argument('sending_freq', type=int, help='interval (in s) between sending a batch')
     parser.add_argument('wireless_interface', type=str, help='name of the wireless interface')
-    parser.add_argument('data_store', type=str, help='filename of database for network messages')
     return parser.parse_args()
 
 
@@ -90,6 +89,5 @@ if __name__ == "__main__":
 
     bind_layers(aDTNPacket, aDTNInnerPacket)
     bind_layers(Ether, aDTNPacket, type=0xcafe)
-    adtn = aDTN(args.batch_size, args.sending_freq, args.wireless_interface,
-                args.data_store)
+    adtn = aDTN(args.batch_size, args.sending_freq, args.wireless_interface)
     adtn.run()
