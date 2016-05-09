@@ -44,7 +44,7 @@ class MessageStore():
                     self.stats.update({'last_received': now}, Stats.idx == idx)
                     self.stats.update(increment('receive_count'), Stats.idx == idx)
 
-    def get_messages(self, count=1):
+    def get_messages(self):
         with self.lock:
             Stats = Query()
             stats = self.stats.search(Stats.deleted == False)
@@ -97,12 +97,9 @@ if __name__ == '__main__':
 
     if args.message is not None:
         ms.add_message(args.message)
-
     if args.to_delete is not None:
         ms.delete_message(args.to_delete)
-
     if args.all:
         ms.print_messages()
-
     if args.wipe:
         ms.wipe()
