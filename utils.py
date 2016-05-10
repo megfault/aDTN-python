@@ -15,7 +15,7 @@ def log(s):
 
 def generate_iv():
     """
-    Generates a random initialization vector of appropriate length for Salsa20.
+    Generate a random initialization vector of appropriate length for Salsa20.
     :return: a random bytestring the size of a Salsa20 nonce (24 bytes)
     """
     return rand(SecretBox.NONCE_SIZE)
@@ -23,8 +23,8 @@ def generate_iv():
 
 def encrypt(plaintext, key, nonce_generator=generate_iv):
     """
-    Encrypts a bytestring with the given key using the Salsa20 algorithm.
-    Uses a new nonce by default, but can be overridden in case one needs a custom nonce.
+    Encrypt a bytestring with the given key using the Salsa20 algorithm.
+    Encryption uses a new nonce by default, but can be overridden in case one needs a custom nonce.
     :param plaintext: the bytestring to encrypt
     :param key: a 32 byte long bytestring
     :param nonce_generator: a function that returns a 24 byte long bytestring
@@ -45,7 +45,7 @@ def decrypt(ciphertext, key):
 
 def hash_string(s):
     """
-    Hashes the input string and converts the result to string format.
+    Hash the input string and convert the result to string format.
     :param s: a string to hash
     :return: the hash of the input string in string format.
     """
@@ -56,7 +56,7 @@ def hash_string(s):
 
 def b2s(b):
     """
-    Converts a bytestring to a string.
+    Convert a bytestring to a string.
     :param b: the bytestring to convert.
     :return: the decoded bytestring in string format.
     """
@@ -65,7 +65,7 @@ def b2s(b):
 
 def s2b(s):
     """
-    Converts a string to a bytestring.
+    Convert a string to a bytestring.
     :param s: the string to convert
     :return: the bytestring conversion of the input string.
     """
