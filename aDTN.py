@@ -23,7 +23,11 @@ class aDTN():
         """
         Initialize an aDTN instance and its respective key manager and message store, as well as a sending message pool
         from which the next sending batch gets generated.
-        It also starts two threads: one handles received messages and the other periodically sends a batch of messages
+
+        Define aDTNInnerPacket to be the payload of aDTNPacket. Define aDTNPacket to be the payload of Ethernet frames
+        of type 0xcafe.
+
+        Start two threads: one handles received messages and the other periodically sends a batch of messages
         every sending_freq seconds, then refills the sending pool if necessary.
 
         The wireless interface should be previously set to ad-hoc mode and its ESSID should be the same in other devices
@@ -42,6 +46,8 @@ class aDTN():
         self.next_message = 0
         self.scheduler = sched.scheduler(time.time, time.sleep)
         self.scheduler.enter(self.sending_freq, 1, self.send)
+        bind_layers(aDTNPacket, aDTNInnerPacket)
+        bind_layers(Ether, aDTNPacket, type=0xcafe)
         self.run()
 
     def prepare_sending_pool(self):
@@ -123,7 +129,4 @@ def parse_args():
 
 if __name__ == "__main__":
     args = parse_args()
-
-    bind_layers(aDTNPacket, aDTNInnerPacket)
-    bind_layers(Ether, aDTNPacket, type=0xcafe)
     adtn = aDTN(args.batch_size, args.sending_freq, args.wireless_interface)
