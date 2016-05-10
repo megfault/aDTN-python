@@ -20,6 +20,18 @@ class aDTN():
     Received payload is stored in a MessageStore instance.
     '''
     def __init__(self, batch_size, sending_freq, wireless_interface):
+        """
+        Initialize an aDTN instance and its respective key manager and message store, as well as a sending message pool
+        from which the next sending batch gets generated.
+        It also starts two threads: one handles received messages and the other periodically sends a batch of messages
+        every sending_freq seconds, then refills the sending pool if necessary.
+
+        The wireless interface should be previously set to ad-hoc mode and its ESSID should be the same in other devices
+        running aDTN.
+        :param batch_size: number of packets to transmit at each sending operation
+        :param sending_freq: number of seconds between two sending operations
+        :param wireless_interface: wireless interface to send and receive packets
+        """
         self.batch_size = batch_size
         self.sending_freq = sending_freq
         self.wireless_interface = wireless_interface
@@ -32,6 +44,11 @@ class aDTN():
         self.scheduler.enter(self.sending_freq, 1, self.send)
 
     def prepare_sending_pool(self):
+        """
+        Refill the sending pool with packets if its length drops below the sending batch size. Packets contain
+        encrypted messages from the message store. If there are not enough messages to be sent, fake packets are
+        generated until the sending pool is full.
+        """
         if len(self.sending_pool) < self.batch_size:
             to_send = self.ms.get_messages(count=self.batch_size)
             for message in to_send:
@@ -43,6 +60,12 @@ class aDTN():
                 self.sending_pool.append((aDTNPacket(key=fake_key) / aDTNInnerPacket()))
 
     def send(self):
+        """
+        Send a batch of randomly selected packets from the sending pool, then ensure the sending pool gets refilled if
+        necessary. The packets are encapsulated in an Ethernet frame of type 0xcafe and removed from the sending pool,
+        and finally broadcast in a batch.
+        This function reschedules itself to occur every sending_freq seconds.
+        """
         self.scheduler.enter(self.sending_freq, 1, self.send)
         batch = []
         s = sample(self.sending_pool, self.batch_size)
@@ -54,6 +77,12 @@ class aDTN():
         self.prepare_sending_pool()
 
     def process(self, frame):
+        """
+        Process a received frame by attempting to decrypt its payload - the aDTN packet - with every key in the key
+        store. If a decryption succeeds, the extracted message is stored in the message store, otherwise the next key is
+        used. If all decryptions fail, the packet is discarded.
+        :param frame: the Ethernet frame containing an aDTN packet
+        """
         payload = frame.payload.load
         for key in self.km.keys.values():
             try:
@@ -63,11 +92,15 @@ class aDTN():
                 logging.debug("Decrypted with key {}".format(b2s(key)[:6]))
                 logging.debug("Received msg: {}".format(msg))
                 self.ms.add_message(msg)
-                return
             except CryptoError:
                 pass
 
     def run(self):
+        """
+        Run the aDTN network functionality in two threads, one for sending and the other for receiving. Received
+        Ethernet frames are filtered for ethertype and processed if they match the 0xcafe type. The sending thread runs
+        a scheduler for periodic sending of aDTN packets.
+        """
         t_snd = Thread(target=self.scheduler.run, kwargs={"blocking": True})
         t_rcv = Thread(target=sniff, kwargs={"iface": self.wireless_interface,
                                              "prn": lambda p: self.process(p),
@@ -77,6 +110,9 @@ class aDTN():
         t_rcv.start()
 
 def parse_args():
+    """ Parse command line arguments.
+    :return: arguments received via the command line
+    """
     parser = ArgumentParser(description='Run an aDTN simulation instance.')
     parser.add_argument('batch_size', type=int, help='how many messages to send in a batch')
     parser.add_argument('sending_freq', type=int, help='interval (in s) between sending a batch')
