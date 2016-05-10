@@ -3,7 +3,7 @@ This is a work-in-progress, experimental Python 3 implementation of aDTN, a netw
 
 On top of it is a simple mechanism to flood messages all over the network. It can be viewed as a propaganda-spreading automated system that hides the source of the content.
 
-Planned are further services that run on top of aDTN, such as a more controlled way to exchange data of all kinds, not just messages. One could implement an anonymous publish-subscribe system or an anonymous file-sharing network on near-by devices without any need for infrastructure such as an Internet connection or wireless access points.
+Planned are further services that run on top of aDTN, such as a more controlled way to exchange data of all kinds, not just messages. One could implement an anonymous publish-subscribe system or an anonymous file-sharing network on nearby devices without any need for infrastructure such as an Internet connection or wireless access points.
 
 
 ## If you want to test/run it...
