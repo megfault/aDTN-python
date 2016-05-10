@@ -42,6 +42,7 @@ class aDTN():
         self.next_message = 0
         self.scheduler = sched.scheduler(time.time, time.sleep)
         self.scheduler.enter(self.sending_freq, 1, self.send)
+        self.run()
 
     def prepare_sending_pool(self):
         """
@@ -126,4 +127,3 @@ if __name__ == "__main__":
     bind_layers(aDTNPacket, aDTNInnerPacket)
     bind_layers(Ether, aDTNPacket, type=0xcafe)
     adtn = aDTN(args.batch_size, args.sending_freq, args.wireless_interface)
-    adtn.run()
