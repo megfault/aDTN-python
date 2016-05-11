@@ -88,7 +88,7 @@ class aDTN():
         Process a received frame by attempting to decrypt its payload - the aDTN packet - with every key in the key
         store. If a decryption succeeds, the extracted message is stored in the message store, otherwise the next key is
         used. If all decryptions fail, the packet is discarded.
-        :param frame: the Ethernet frame containing an aDTN packet
+        :param frame: Ethernet frame containing an aDTN packet
         """
         payload = frame.payload.load
         for key in self.km.keys.values():
