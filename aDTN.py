@@ -7,7 +7,7 @@ from argparse import ArgumentParser
 from random import sample
 import logging
 
-from message_store import MessageStore
+from message_store import DataStore
 from key_manager import KeyManager
 from aDTN_packet import aDTNPacket, aDTNInnerPacket
 from utils import b2s
@@ -40,7 +40,7 @@ class aDTN():
         self.sending_freq = sending_freq
         self.wireless_interface = wireless_interface
         self.km = KeyManager()
-        self.ms = MessageStore()
+        self.ms = DataStore()
         self.sending_pool = []
         self.prepare_sending_pool()
         self.next_message = 0
@@ -57,7 +57,7 @@ class aDTN():
         generated until the sending pool is full.
         """
         if len(self.sending_pool) < self.batch_size:
-            to_send = self.ms.get_messages(count=self.batch_size)
+            to_send = self.ms.get_data(count=self.batch_size)
             for message in to_send:
                 for key in self.km.keys.values():
                     pkt = aDTNPacket(key=key) / aDTNInnerPacket() / message
@@ -98,7 +98,7 @@ class aDTN():
                 msg = ap.payload.payload.load.decode('utf-8')
                 logging.debug("Decrypted with key {}".format(b2s(key)[:6]))
                 logging.debug("Received msg: {}".format(msg))
-                self.ms.add_message(msg)
+                self.ms.add_object(msg)
             except CryptoError:
                 pass
 
