@@ -43,7 +43,7 @@ class DataStore():
             if len(res) == 0:
                 self.data.insert({'idx': idx, 'content': data})
                 self.stats.insert({'idx': idx,
-                                   'first_seen': time,
+                                   'first_seen': now,
                                    'receive_count': 0,
                                    'send_count': 0,
                                    'last_received': None,
