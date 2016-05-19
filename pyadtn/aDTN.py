@@ -7,10 +7,10 @@ from argparse import ArgumentParser
 from random import sample
 import logging
 
-from message_store import DataStore
-from key_manager import KeyManager
-from aDTN_packet import aDTNPacket, aDTNInnerPacket
-from utils import b2s
+from pyadtn.message_store import DataStore
+from pyadtn.key_manager import KeyManager
+from pyadtn.aDTN_packet import aDTNPacket, aDTNInnerPacket
+from pyadtn.utils import b2s
 
 
 class aDTN():
