@@ -5,8 +5,8 @@ from nacl.hash import sha256
 from nacl.encoding import HexEncoder
 from argparse import ArgumentParser
 
-from utils import b2s, s2b
-from settings import DEFAULT_DIR, KEYS_DIR
+from pyadtn.utils import b2s, s2b
+from pyadtn.settings import DEFAULT_DIR, KEYS_DIR
 
 
 class KeyManager():

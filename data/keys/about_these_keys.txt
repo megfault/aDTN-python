@@ -1,3 +1,0 @@
-The keys in this directory are example keys I am using for an experiment/test.
-
-You should remove them and generate your own.

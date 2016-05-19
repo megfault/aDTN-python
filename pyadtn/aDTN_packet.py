@@ -1,4 +1,4 @@
-from utils import encrypt, decrypt
+from pyadtn.utils import encrypt, decrypt
 from scapy.all import Packet, LenField
 
 

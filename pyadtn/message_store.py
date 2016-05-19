@@ -5,8 +5,8 @@ from threading import RLock
 from argparse import ArgumentParser
 
 
-from settings import DEFAULT_DIR, DEFAULT_DATABASE_FN
-from utils import log, hash_string
+from pyadtn.settings import DEFAULT_DIR, DEFAULT_DATABASE_FN
+from pyadtn.utils import log, hash_string
 
 
 class DataStore():
