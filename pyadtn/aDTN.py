@@ -120,6 +120,7 @@ class aDTN():
                                                              "store": 0})
         self.__thread_receive.start()
 
+
     def stop(self):
         """
         Stop aDTN. Make sure the two threads created at start are finished properly.
@@ -150,5 +151,5 @@ def parse_args():
 if __name__ == "__main__":
     args = parse_args()
     adtn = aDTN(args.batch_size, args.sending_freq, args.wireless_interface)
-    register(adtn.stop)
+    register(aDTN.stop, adtn)
     adtn.start()
