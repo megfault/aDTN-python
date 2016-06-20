@@ -6,6 +6,7 @@ from threading import Thread
 from argparse import ArgumentParser
 from random import sample
 import logging
+from atexit import register
 
 from pyadtn.message_store import DataStore
 from pyadtn.key_manager import KeyManager
@@ -27,8 +28,8 @@ class aDTN():
         Define aDTNInnerPacket to be the payload of aDTNPacket. Define aDTNPacket to be the payload of Ethernet frames
         of type 0xcafe.
 
-        Start two threads: one handles received messages and the other periodically sends a batch of messages
-        every sending_freq seconds, then refills the sending pool if necessary.
+        Set up a scheduler to handle message sending.
+        Define a thread to handle received messages.
 
         The wireless interface should be previously set to ad-hoc mode and its ESSID should be the same in other devices
         running aDTN.
@@ -36,54 +37,53 @@ class aDTN():
         :param sending_freq: number of seconds between two sending operations
         :param wireless_interface: wireless interface to send and receive packets
         """
-        self.batch_size = batch_size
-        self.sending_freq = sending_freq
-        self.wireless_interface = wireless_interface
-        self.km = KeyManager()
-        self.ms = DataStore()
-        self.sending_pool = []
-        self.prepare_sending_pool()
-        self.next_message = 0
-        self.scheduler = sched.scheduler(time.time, time.sleep)
-        self.scheduler.enter(self.sending_freq, 1, self.send)
+        self.__batch_size = batch_size
+        self.__sending_freq = sending_freq
+        self.__wireless_interface = wireless_interface
+        self.__km = KeyManager()
+        self.__ms = DataStore()
+        self.__sending_pool = []
+        self.__scheduler = sched.scheduler(time.time, time.sleep)
+        self.__scheduled = None
+        self.__thread_receive = None
         bind_layers(aDTNPacket, aDTNInnerPacket)
         bind_layers(Ether, aDTNPacket, type=0xcafe)
-        self.run()
 
-    def prepare_sending_pool(self):
+    def __prepare_sending_pool(self):
         """
         Refill the sending pool with packets if its length drops below the sending batch size. Packets contain
         encrypted messages from the message store. If there are not enough messages to be sent, fake packets are
         generated until the sending pool is full.
         """
-        if len(self.sending_pool) < self.batch_size:
-            to_send = self.ms.get_data()[:self.batch_size]
+        if len(self.__sending_pool) < self.__batch_size:
+            to_send = self.__ms.get_data()[:self.__batch_size]
             for message in to_send:
-                for key in self.km.keys.values():
-                    pkt = aDTNPacket(key=key) / aDTNInnerPacket() / message
-                    self.sending_pool.append(pkt)
-            while len(self.sending_pool) < self.batch_size:
-                fake_key = self.km.get_fake_key()
-                self.sending_pool.append((aDTNPacket(key=fake_key) / aDTNInnerPacket()))
+                for key in self.__km.keys.values():
+                    packet = aDTNPacket(key=key) / aDTNInnerPacket() / message
+                    self.__sending_pool.append(packet)
+            while len(self.__sending_pool) < self.__batch_size:
+                fake_key = self.__km.get_fake_key()
+                self.__sending_pool.append((aDTNPacket(key=fake_key) / aDTNInnerPacket()))
 
-    def send(self):
+    def __send(self):
         """
         Send a batch of randomly selected packets from the sending pool, then ensure the sending pool gets refilled if
         necessary. The packets are encapsulated in an Ethernet frame of type 0xcafe and removed from the sending pool,
         and finally broadcast in a batch.
         This function reschedules itself to occur every sending_freq seconds.
         """
-        self.scheduler.enter(self.sending_freq, 1, self.send)
-        batch = []
-        s = sample(self.sending_pool, self.batch_size)
-        for pkt in s:
-            batch.append(Ether(dst="ff:ff:ff:ff:ff:ff", type=0xcafe) / pkt)
-            self.sending_pool.remove(pkt)
-        sendp(batch, iface=self.wireless_interface)
-        logging.debug("Sent batch")
-        self.prepare_sending_pool()
+        if self.__scheduled == True:
+            self.__scheduler.enter(self.__sending_freq, 1, self.__send)
+            batch = []
+            s = sample(self.__sending_pool, self.__batch_size)
+            for pkt in s:
+                batch.append(Ether(dst="ff:ff:ff:ff:ff:ff", type=0xcafe) / pkt)
+                self.__sending_pool.remove(pkt)
+            sendp(batch, iface=self.__wireless_interface)
+            logging.debug("Sent batch")
+            self.__prepare_sending_pool()
 
-    def process(self, frame):
+    def __process(self, frame):
         """
         Process a received frame by attempting to decrypt its payload - the aDTN packet - with every key in the key
         store. If a decryption succeeds, the extracted message is stored in the message store, otherwise the next key is
@@ -91,30 +91,50 @@ class aDTN():
         :param frame: Ethernet frame containing an aDTN packet
         """
         payload = frame.payload.load
-        for key in self.km.keys.values():
+        for key in self.__km.keys.values():
             try:
                 ap = aDTNPacket(key=key)
                 ap.dissect(payload)
                 msg = ap.payload.payload.load.decode('utf-8')
                 logging.debug("Decrypted with key {}".format(b2s(key)[:6]))
                 logging.debug("Received msg: {}".format(msg))
-                self.ms.add_object(msg)
+                self.__ms.add_object(msg)
             except CryptoError:
                 pass
 
-    def run(self):
+    def start(self):
         """
         Run the aDTN network functionality in two threads, one for sending and the other for receiving. Received
         Ethernet frames are filtered for ethertype and processed if they match the 0xcafe type. The sending thread runs
         a scheduler for periodic sending of aDTN packets.
         """
-        t_snd = Thread(target=self.scheduler.run, kwargs={"blocking": True})
-        t_rcv = Thread(target=sniff, kwargs={"iface": self.wireless_interface,
-                                             "prn": lambda p: self.process(p),
-                                             "filter": "ether proto 0xcafe",
-                                             "store": 0})
-        t_snd.start()
-        t_rcv.start()
+        self.__prepare_sending_pool()
+        self.__scheduler.enter(self.__sending_freq, 1, self.__send)
+        self.__scheduled = True
+        self.__thread_send = Thread(target=self.__scheduler.run, kwargs={"blocking": True})
+        self.__thread_send.start()
+
+        self.__thread_receive = Thread(target=sniff, kwargs={"iface": self.__wireless_interface,
+                                                             "prn": lambda p: self.__process(p),
+                                                             "filter": "ether proto 0xcafe",
+                                                             "store": 0})
+        self.__thread_receive.start()
+
+    def stop(self):
+        """
+        Stop aDTN. Make sure the two threads created at start are finished properly.
+        """
+        self.__scheduled = False
+        try:
+            while not self.__scheduler.empty():
+                event = self.__scheduler.queue.pop()
+                self.__scheduler.cancel(event)
+        except ValueError: # In case the popped event started running in the meantime...
+            self.stop() # ...call the stop function once more.
+        # By now the scheduler has run empty and so the sending thread has stopped.
+        # Now we just have to join the receiving thread to stop aDTN completely:
+        self.__thread_receive.join()
+
 
 def parse_args():
     """ Parse command line arguments.
@@ -130,3 +150,5 @@ def parse_args():
 if __name__ == "__main__":
     args = parse_args()
     adtn = aDTN(args.batch_size, args.sending_freq, args.wireless_interface)
+    register(adtn.stop)
+    adtn.start()
