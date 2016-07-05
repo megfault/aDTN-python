@@ -15,7 +15,7 @@ class DataStore():
     Payload retrieved from the datastore are chosen according to a fairness heuristic in order to give least
     popular objects in the network a chance to spread.
     """
-    def __init__(self, size_threshold=None, db_filename=DEFAULT_DATABASE_FN):
+    def __init__(self, db_filename, size_threshold=None):
         """
         Initialize data store.
         :param size_threshold: maximum storage size, in number of data objects
@@ -113,6 +113,7 @@ class DataStore():
 
 def parse_args():
     parser = ArgumentParser(description='Manage aDTN messages')
+    parser.add_argument('datafile', type=str, dest="data_store", default=None, help="file storing the data objects")
     parser.add_argument('-c', metavar="data", type=str, dest="data", default=None, help='create a data object and add it to the data store for later sending')
     parser.add_argument('-a', '--all', action="store_true", help='display all data objects')
     parser.add_argument('-w', '--wipe', action="store_true", help='wipe all data objects and stats')
@@ -122,7 +123,7 @@ def parse_args():
 if __name__ == '__main__':
     args = parse_args()
 
-    ms = DataStore()
+    ms = DataStore(args.data_store)
 
     if args.data is not None:
         ms.add_object(args.data)
