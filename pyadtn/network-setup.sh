@@ -2,7 +2,6 @@
 
 DEVICE="$1"
 SSID="$2"
-FREQ="$3"
 
 rmmod ath9k
 modprobe ath9k
