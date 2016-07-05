@@ -13,6 +13,8 @@ from pyadtn.key_manager import KeyManager
 from pyadtn.aDTN_packet import aDTNPacket, aDTNInnerPacket
 from pyadtn.utils import b2s
 
+FILTER = "ether proto 0xcafe"
+SNIFF_TIMEOUT = 5
 
 class aDTN():
     '''
@@ -45,6 +47,7 @@ class aDTN():
         self.__sending_pool = []
         self.__scheduler = sched.scheduler(time.time, time.sleep)
         self.__scheduled = None
+        self.__sniffing = False
         self.__thread_receive = None
         bind_layers(aDTNPacket, aDTNInnerPacket)
         bind_layers(Ether, aDTNPacket, type=0xcafe)
@@ -83,6 +86,8 @@ class aDTN():
             logging.debug("Sent batch")
             self.__prepare_sending_pool()
 
+
+
     def __process(self, frame):
         """
         Process a received frame by attempting to decrypt its payload - the aDTN packet - with every key in the key
@@ -102,6 +107,21 @@ class aDTN():
             except CryptoError:
                 pass
 
+    def __sniff(self):
+        while True:
+            if self.__sniffing is False:
+                return
+            sniff(iface=self.__wireless_interface, prn=self.__process, filter=FILTER, store=0, timeout=SNIFF_TIMEOUT)
+
+    def start_receiving(self):
+        self.__sniffing = True
+        self.__thread_receive = Thread(target=self.__sniff)
+        self.__thread_receive.start()
+
+    def stop_receiving(self):
+        self.__sniffing = False
+        self.__thread_receive.join()
+        
     def start(self):
         """
         Run the aDTN network functionality in two threads, one for sending and the other for receiving. Received
@@ -113,13 +133,7 @@ class aDTN():
         self.__scheduled = True
         self.__thread_send = Thread(target=self.__scheduler.run, kwargs={"blocking": True})
         self.__thread_send.start()
-
-        self.__thread_receive = Thread(target=sniff, kwargs={"iface": self.__wireless_interface,
-                                                             "prn": lambda p: self.__process(p),
-                                                             "filter": "ether proto 0xcafe",
-                                                             "store": 0})
-        self.__thread_receive.start()
-
+        self.start_receiving()
 
     def stop(self):
         """
@@ -134,7 +148,7 @@ class aDTN():
             self.stop() # ...call the stop function once more.
         # By now the scheduler has run empty and so the sending thread has stopped.
         # Now we just have to join the receiving thread to stop aDTN completely:
-        self.__thread_receive.join()
+        self.stop_receiving()
 
 
 def parse_args():
