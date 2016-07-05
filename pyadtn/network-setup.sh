@@ -1,7 +1,6 @@
 #!/bin/bash
 
 DEVICE="$1"
-SSID="$2"
 
 rmmod ath9k
 modprobe ath9k
