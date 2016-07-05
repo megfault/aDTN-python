@@ -113,7 +113,7 @@ class DataStore():
 
 def parse_args():
     parser = ArgumentParser(description='Manage aDTN messages')
-    parser.add_argument('datafile', type=str, dest="data_store", default=None, help="file storing the data objects")
+    parser.add_argument('data_store', type=str, default=None, help="file storing the data objects")
     parser.add_argument('-c', metavar="data", type=str, dest="data", default=None, help='create a data object and add it to the data store for later sending')
     parser.add_argument('-a', '--all', action="store_true", help='display all data objects')
     parser.add_argument('-w', '--wipe', action="store_true", help='wipe all data objects and stats')

@@ -145,11 +145,12 @@ def parse_args():
     parser.add_argument('batch_size', type=int, help='how many messages to send in a batch')
     parser.add_argument('sending_freq', type=int, help='interval (in s) between sending a batch')
     parser.add_argument('wireless_interface', type=str, help='name of the wireless interface')
+    parser.add_argument('data_store', type=str, default=None, help="file storing the data objects")
     return parser.parse_args()
 
 
 if __name__ == "__main__":
     args = parse_args()
-    adtn = aDTN(args.batch_size, args.sending_freq, args.wireless_interface)
+    adtn = aDTN(args.batch_size, args.sending_freq, args.wireless_interface, args.data_store)
     register(aDTN.stop, adtn)
     adtn.start()
