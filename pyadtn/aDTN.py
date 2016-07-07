@@ -14,6 +14,7 @@ from pyadtn.aDTN_packet import aDTNPacket, aDTNInnerPacket
 from pyadtn.utils import b2s
 
 FILTER = "ether proto 0xcafe"
+SNIFF_TIMEOUT = 5
 
 class aDTN():
     """
@@ -46,6 +47,7 @@ class aDTN():
         self.__sending_pool = []
         self.__scheduler = sched.scheduler(time.time, time.sleep)
         self.__scheduled = None
+        self.__sniffing = None
         self.__thread_send = None
         self.__thread_receive = None
         bind_layers(aDTNPacket, aDTNInnerPacket)
@@ -107,7 +109,10 @@ class aDTN():
 
     def __sniff(self):
         """ Wrapper for packet sniffing. """
-        sniff(iface=self.__wireless_interface, prn=self.__process, filter=FILTER, store=0)
+        while True:
+            if self.__sniffing is False:
+                return
+            sniff(iface=self.__wireless_interface, prn=self.__process, filter=FILTER, store=0, timeout=SNIFF_TIMEOUT)
 
     def start(self):
         """
@@ -120,6 +125,7 @@ class aDTN():
         self.__scheduled = True
         self.__thread_send = Thread(target=self.__scheduler.run, kwargs={"blocking": True})
         self.__thread_send.start()
+        self.__sniffing = True
         self.__thread_receive = Thread(target=self.__sniff)
 
     def stop(self):
@@ -135,6 +141,7 @@ class aDTN():
             self.stop() # ...call the stop function once more.
         # By now the scheduler has run empty and so the sending thread has stopped.
         # Now we just have to join the receiving thread to stop aDTN completely:
+        self.__sniffing = False
         self.__thread_receive.join()
 
 
