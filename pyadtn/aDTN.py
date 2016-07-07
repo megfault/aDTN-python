@@ -14,14 +14,13 @@ from pyadtn.aDTN_packet import aDTNPacket, aDTNInnerPacket
 from pyadtn.utils import b2s
 
 FILTER = "ether proto 0xcafe"
-SNIFF_TIMEOUT = 5
 
 class aDTN():
-    '''
+    """
     Receives and sends aDTN packets.
     Keys used for encrypting and decrypting the packets are stored in a KeyManager.
     Received payload is stored in a MessageStore instance.
-    '''
+    """
     def __init__(self, batch_size, sending_freq, wireless_interface, data_store):
         """
         Initialize an aDTN instance and its respective key manager and message store, as well as a sending message pool
@@ -47,7 +46,7 @@ class aDTN():
         self.__sending_pool = []
         self.__scheduler = sched.scheduler(time.time, time.sleep)
         self.__scheduled = None
-        self.__sniffing = False
+        self.__thread_send = None
         self.__thread_receive = None
         bind_layers(aDTNPacket, aDTNInnerPacket)
         bind_layers(Ether, aDTNPacket, type=0xcafe)
@@ -75,7 +74,7 @@ class aDTN():
         and finally broadcast in a batch.
         This function reschedules itself to occur every sending_freq seconds.
         """
-        if self.__scheduled == True:
+        if self.__scheduled is True:
             self.__scheduler.enter(self.__sending_freq, 1, self.__send)
             batch = []
             s = sample(self.__sending_pool, self.__batch_size)
@@ -85,7 +84,6 @@ class aDTN():
             sendp(batch, iface=self.__wireless_interface)
             logging.debug("Sent batch")
             self.__prepare_sending_pool()
-
 
 
     def __process(self, frame):
@@ -108,24 +106,9 @@ class aDTN():
                 pass
 
     def __sniff(self):
-        while True:
-            if self.__sniffing is False:
-                return
-            try:
-                sniff(iface=self.__wireless_interface, prn=self.__process, filter=FILTER, store=0, timeout=SNIFF_TIMEOUT)
-            except Exception:#
-                print("Sniffing has failed")
-                pass
+        """ Wrapper for packet sniffing. """
+        sniff(iface=self.__wireless_interface, prn=self.__process, filter=FILTER, store=0)
 
-    def start_receiving(self):
-        self.__sniffing = True
-        self.__thread_receive = Thread(target=self.__sniff)
-        self.__thread_receive.start()
-
-    def stop_receiving(self):
-        self.__sniffing = False
-        self.__thread_receive.join()
-        
     def start(self):
         """
         Run the aDTN network functionality in two threads, one for sending and the other for receiving. Received
@@ -137,7 +120,7 @@ class aDTN():
         self.__scheduled = True
         self.__thread_send = Thread(target=self.__scheduler.run, kwargs={"blocking": True})
         self.__thread_send.start()
-        self.start_receiving()
+        self.__thread_receive = Thread(target=self.__sniff)
 
     def stop(self):
         """
@@ -152,7 +135,7 @@ class aDTN():
             self.stop() # ...call the stop function once more.
         # By now the scheduler has run empty and so the sending thread has stopped.
         # Now we just have to join the receiving thread to stop aDTN completely:
-        self.stop_receiving()
+        self.__thread_receive.join()
 
 
 def parse_args():
