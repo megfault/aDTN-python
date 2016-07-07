@@ -111,7 +111,11 @@ class aDTN():
         while True:
             if self.__sniffing is False:
                 return
-            sniff(iface=self.__wireless_interface, prn=self.__process, filter=FILTER, store=0, timeout=SNIFF_TIMEOUT)
+            try:
+                sniff(iface=self.__wireless_interface, prn=self.__process, filter=FILTER, store=0, timeout=SNIFF_TIMEOUT)
+            except Exception:#
+                print("Sniffing has failed")
+                pass
 
     def start_receiving(self):
         self.__sniffing = True
