@@ -99,17 +99,19 @@ class DataStore():
         """
         Print a list of data objects preceded by its object ID.
         """
-        objects = ms.data.all()
-        for obj in objects:
-            print("{}\t{}".format(obj['idx'], obj['content']))
+        with self.lock:
+            objects = ms.data.all()
+            for obj in objects:
+                print("{}\t{}".format(obj['idx'], obj['content']))
 
     def wipe(self):
         """
         Empty the data store.
         """
-        self.stats.purge()
-        self.data.purge()
-        self.db.purge()
+        with self.lock:
+            self.stats.purge()
+            self.data.purge()
+            self.db.purge()
 
 def parse_args():
     parser = ArgumentParser(description='Manage aDTN messages')
