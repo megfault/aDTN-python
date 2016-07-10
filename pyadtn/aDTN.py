@@ -127,6 +127,7 @@ class aDTN():
         self.__thread_send.start()
         self.__sniffing = True
         self.__thread_receive = Thread(target=self.__sniff)
+        self.__thread_receive.start()
 
     def stop(self):
         """
