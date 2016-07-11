@@ -46,7 +46,7 @@ class aDTN():
         self._ms = DataStore(data_store)
         self._sending_pool = []
         self._scheduler = sched.scheduler(time.time, time.sleep)
-        self._scheduled = None
+        self._sending = None
         self._sniffing = None
         self._thread_send = None
         self._thread_receive = None
@@ -77,7 +77,7 @@ class aDTN():
         This function reschedules itself to occur every sending_freq seconds.
         """
         self._scheduler.enter(self._sending_freq, 1, self._send)
-        if self._scheduled is True:
+        if self._sending is True:
             batch = []
             s = sample(self._sending_pool, self._batch_size)
             for pkt in s:
@@ -121,7 +121,7 @@ class aDTN():
         """
         self._prepare_sending_pool()
         self._scheduler.enter(self._sending_freq, 1, self._send)
-        self._scheduled = True
+        self._sending = True
         self._thread_send = Thread(target=self._scheduler.run, kwargs={"blocking": True})
         self._thread_send.start()
         self._sniffing = True
@@ -132,7 +132,7 @@ class aDTN():
         """
         Stop aDTN. Make sure the two threads created at start are finished properly.
         """
-        self._scheduled = False
+        self._sending = False
         try:
             while not self._scheduler.empty():
                 event = self._scheduler.queue.pop()
