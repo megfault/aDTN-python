@@ -76,8 +76,8 @@ class aDTN():
         and finally broadcast in a batch.
         This function reschedules itself to occur every sending_freq seconds.
         """
+        self._scheduler.enter(self._sending_freq, 1, self._send)
         if self._scheduled is True:
-            self._scheduler.enter(self._sending_freq, 1, self._send)
             batch = []
             s = sample(self._sending_pool, self._batch_size)
             for pkt in s:
