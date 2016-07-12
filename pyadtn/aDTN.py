@@ -44,7 +44,7 @@ class aDTN():
         self._sending_freq = sending_freq
         self._wireless_interface = wireless_interface
         self._km = KeyManager()
-        self._ms = DataStore(data_store)
+        self.data_store = DataStore(data_store)
         self._sending_pool = []
         self._scheduler = sched.scheduler(time.time, time.sleep)
         self._sending = None
@@ -61,7 +61,7 @@ class aDTN():
         generated until the sending pool is full.
         """
         if len(self._sending_pool) < self._batch_size:
-            to_send = self._ms.get_data()[:self._batch_size]
+            to_send = self.data_store.get_data()[:self._batch_size]
             for message in to_send:
                 for key in self._km.keys.values():
                     packet = aDTNPacket(key=key) / aDTNInnerPacket() / message
@@ -103,7 +103,7 @@ class aDTN():
                 msg = ap.payload.payload.load.decode('utf-8')
                 logging.debug("Decrypted with key {}".format(b2s(key)[:6]))
                 logging.debug("Received msg: {}".format(msg))
-                self._ms.add_object(msg)
+                self.data_store.add_object(msg)
             except CryptoError:
                 pass
 
