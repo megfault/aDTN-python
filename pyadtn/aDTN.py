@@ -16,6 +16,7 @@ from pyadtn.utils import b2s
 FILTER = "ether proto 0xcafe"
 SNIFF_TIMEOUT = 5
 
+
 class aDTN():
     """
     Receives and sends aDTN packets.
@@ -77,7 +78,7 @@ class aDTN():
         This function reschedules itself to occur every sending_freq seconds.
         """
         self._scheduler.enter(self._sending_freq, 1, self._send)
-        if self._sending is True:
+        if self._sending:
             batch = []
             s = sample(self._sending_pool, self._batch_size)
             for pkt in s:
@@ -137,8 +138,8 @@ class aDTN():
             while not self._scheduler.empty():
                 event = self._scheduler.queue.pop()
                 self._scheduler.cancel(event)
-        except ValueError: # In case the popped event started running in the meantime...
-            self.stop() # ...call the stop function once more.
+        except ValueError:  # In case the popped event started running in the meantime...
+            self.stop()  # ...call the stop function once more.
         # By now the scheduler has run empty, so join the thread:
         self._thread_send.join()
         # Now we just have to join the receiving thread to stop aDTN completely:
