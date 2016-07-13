@@ -24,6 +24,7 @@ class KeyManager():
             h = sha256(key, HexEncoder)
             key_id = h.decode('utf-8')[:16]
         self.keys[key_id] = key
+        debug("Key {} was created.".format(key_id))
         self.save_key(key_id)
         return key_id
 
@@ -38,6 +39,7 @@ class KeyManager():
             s = b2s(key)
             with file_path.open('w', encoding='utf-8') as f:
                 f.write(s)
+            debug("Key {} was written to disk".format(key_id))
 
     def save_all_keys(self):
         for key_id in self.keys:
