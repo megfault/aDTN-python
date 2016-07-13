@@ -92,7 +92,6 @@ class aDTN:
                 batch.append(Ether(dst="ff:ff:ff:ff:ff:ff", type=0xcafe) / pkt)
                 self._sending_pool.remove(pkt)
             sendp(batch, iface=self._wireless_interface)
-            debug("Sent batch of size {}.".format(self._batch_size))
             self._sent_pkt_counter += self._batch_size
             self._prepare_sending_pool()
 
@@ -110,8 +109,6 @@ class aDTN:
                 ap = aDTNPacket(key=key)
                 ap.dissect(payload)
                 msg = ap.payload.payload.load.decode('utf-8')
-                debug("Decrypted with key {}".format(b2s(key)[:6]))
-                debug("Received msg: {}".format(msg))
                 self._decrypted_pkt_counter += 1
                 self.data_store.add_object(msg)
                 return
@@ -162,8 +159,9 @@ class aDTN:
         self._thread_receive.join()
         stop_time = time.time()
         uptime = stop_time - self._start_time
-        debug("Running time: {} -- sent: {}, received: {}, decrypted: {}.".format(
-            uptime, self._sent_pkt_counter, self._received_pkt_counter, self._decrypted_pkt_counter))
+        debug("Running time: {} -- sent: {}, received: {}, decrypted: {}, batch size: {}, sending freq.: {}.".format(
+            uptime, self._sent_pkt_counter, self._received_pkt_counter, self._decrypted_pkt_counter, self._batch_size,
+            self._sending_freq))
 
 
 def parse_args():
