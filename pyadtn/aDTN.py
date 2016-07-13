@@ -5,8 +5,8 @@ import sched
 from threading import Thread
 from argparse import ArgumentParser
 from random import sample
-import logging
 from atexit import register
+from logging import basicConfig, debug, DEBUG
 
 from pyadtn.message_store import DataStore
 from pyadtn.key_manager import KeyManager
@@ -15,6 +15,9 @@ from pyadtn.utils import b2s
 
 FILTER = "ether proto 0xcafe"
 SNIFF_TIMEOUT = 5
+
+basicConfig(filename='aDTN.log', level=DEBUG,
+            format='[%(relativeCreated)8d] %(message)s', )
 
 
 class aDTN():
@@ -85,7 +88,7 @@ class aDTN():
                 batch.append(Ether(dst="ff:ff:ff:ff:ff:ff", type=0xcafe) / pkt)
                 self._sending_pool.remove(pkt)
             sendp(batch, iface=self._wireless_interface)
-            logging.debug("Sent batch")
+            debug("Sent batch")
             self._prepare_sending_pool()
 
     def _process(self, frame):
@@ -101,8 +104,8 @@ class aDTN():
                 ap = aDTNPacket(key=key)
                 ap.dissect(payload)
                 msg = ap.payload.payload.load.decode('utf-8')
-                logging.debug("Decrypted with key {}".format(b2s(key)[:6]))
-                logging.debug("Received msg: {}".format(msg))
+                debug("Decrypted with key {}".format(b2s(key)[:6]))
+                debug("Received msg: {}".format(msg))
                 self.data_store.add_object(msg)
             except CryptoError:
                 pass
