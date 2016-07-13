@@ -54,6 +54,12 @@ class aDTN:
         self._sniffing = None
         self._thread_send = None
         self._thread_receive = None
+        self._sent_pkt_counter = 0
+        self._received_pkt_counter = 0
+        self._decrypted_pkt_counter = 0
+        self._uptime = 0
+        self._last_start = None
+        self._last_stop = None
         bind_layers(aDTNPacket, aDTNInnerPacket)
         bind_layers(Ether, aDTNPacket, type=0xcafe)
 
@@ -88,7 +94,8 @@ class aDTN:
                 batch.append(Ether(dst="ff:ff:ff:ff:ff:ff", type=0xcafe) / pkt)
                 self._sending_pool.remove(pkt)
             sendp(batch, iface=self._wireless_interface)
-            debug("Sent batch")
+            debug("Sent batch of size {}.".format(self._batch_size))
+            self._sent_pkt_counter += self._batch_size
             self._prepare_sending_pool()
 
     def _process(self, frame):
@@ -99,6 +106,7 @@ class aDTN:
         :param frame: Ethernet frame containing an aDTN packet
         """
         payload = frame.payload.load
+        self._received_pkt_counter += 1
         for key in self._km.keys.values():
             try:
                 ap = aDTNPacket(key=key)
@@ -106,6 +114,7 @@ class aDTN:
                 msg = ap.payload.payload.load.decode('utf-8')
                 debug("Decrypted with key {}".format(b2s(key)[:6]))
                 debug("Received msg: {}".format(msg))
+                self._decrypted_pkt_counter_pkt_counter += 1
                 self.data_store.add_object(msg)
             except CryptoError:
                 pass
