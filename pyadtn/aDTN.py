@@ -20,7 +20,7 @@ basicConfig(filename='aDTN.log', level=DEBUG,
             format='[%(relativeCreated)8d] %(message)s', )
 
 
-class aDTN():
+class aDTN:
     """
     Receives and sends aDTN packets.
     Keys used for encrypting and decrypting the packets are stored in a KeyManager.

@@ -12,7 +12,7 @@ basicConfig(filename='message_store.log', level=DEBUG,
             format='[%(relativeCreated)8d] %(message)s', )
 
 
-class DataStore():
+class DataStore:
     """
     Network layer storage for payload received and sent by aDTN.
     Payload retrieved from the datastore are chosen according to a fairness heuristic in order to give least

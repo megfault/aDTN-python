@@ -13,7 +13,7 @@ basicConfig(filename='key_manager.log', level=DEBUG,
             format='[%(relativeCreated)8d] %(message)s', )
 
 
-class KeyManager():
+class KeyManager:
     def __init__(self, default_dir=DEFAULT_DIR, keys_dir=KEYS_DIR):
         self.default_dir = default_dir
         self.keys_dir = keys_dir
