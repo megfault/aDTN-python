@@ -18,14 +18,14 @@ class DataStore:
     Payload retrieved from the datastore are chosen according to a fairness heuristic in order to give least
     popular objects in the network a chance to spread.
     """
-    def __init__(self, db_filename, size_threshold=None):
+    def __init__(self, db_default_dir=DEFAULT_DIR, db_filename=DEFAULT_DATABASE_FN, size_threshold=None):
         """
         Initialize data store.
         :param size_threshold: maximum storage size, in number of data objects
         :param db_filename: name of the file where the data is stored
         """
         self.size_threshold = size_threshold
-        self.db = TinyDB(DEFAULT_DIR + db_filename)
+        self.db = TinyDB(db_default_dir + db_filename)
         self.stats = self.db.table('stats')
         self.data = self.db.table('messages')
         self.lock = RLock()
