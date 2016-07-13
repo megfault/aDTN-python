@@ -14,7 +14,9 @@ basicConfig(filename='key_manager.log', level=DEBUG,
 
 
 class KeyManager():
-    def __init__(self):
+    def __init__(self, default_dir=DEFAULT_DIR, keys_dir=KEYS_DIR):
+        self.default_dir = default_dir
+        self.keys_dir = keys_dir
         self.keys = dict()
         self.load_keys()
 
@@ -31,8 +33,8 @@ class KeyManager():
     def get_fake_key(self):
         return random(SecretBox.KEY_SIZE)
 
-    def save_key(self, key_id, directory=DEFAULT_DIR):
-        path = Path(directory + KEYS_DIR)
+    def save_key(self, key_id):
+        path = Path(self.default_dir + self.keys_dir)
         file_path = path.joinpath(key_id + ".key")
         if not file_path.exists():
             key = self.keys[key_id]
@@ -45,8 +47,8 @@ class KeyManager():
         for key_id in self.keys:
             self.save_key(key_id)
 
-    def load_keys(self, directory=DEFAULT_DIR):
-        path = Path(directory + KEYS_DIR)
+    def load_keys(self):
+        path = Path(self.default_dir + self.keys_dir)
         for file_path in path.iterdir():
             if file_path.suffix == ".key":
                 with file_path.open('r', encoding='utf-8') as f:
