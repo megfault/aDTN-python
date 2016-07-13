@@ -116,6 +116,7 @@ class aDTN:
                 debug("Received msg: {}".format(msg))
                 self._decrypted_pkt_counter_pkt_counter += 1
                 self.data_store.add_object(msg)
+                return
             except CryptoError:
                 pass
 
