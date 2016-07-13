@@ -4,9 +4,12 @@ import time
 from threading import RLock
 from argparse import ArgumentParser
 
-
 from pyadtn.settings import DEFAULT_DIR, DEFAULT_DATABASE_FN
-from pyadtn.utils import log, hash_string
+from pyadtn.utils import hash_string
+
+from logging import basicConfig, debug, DEBUG
+basicConfig(filename='message_store.log', level=DEBUG,
+            format='[%(relativeCreated)8d] %(message)s', )
 
 
 class DataStore():
@@ -49,11 +52,11 @@ class DataStore():
                                    'last_received': None,
                                    'last_sent': None,
                                    'deleted': False})
-                log("Data object inserted: {}".format(data))
+                debug("Data object inserted: {}".format(data))
             else:
                 deleted = res[0]['deleted']
                 if deleted:
-                    log("Received deleted data object: {}".format(data))
+                    debug("Received deleted data object: {}".format(data))
                 else:
                     self.stats.update({'last_received': now}, Stats.idx == idx)
                     self.stats.update(increment('receive_count'), Stats.idx == idx)
@@ -93,7 +96,7 @@ class DataStore():
             if record is not None:
                 self.data.remove(eids=[record.eid])
             else:
-                log("No data to delete: {}".format(object_id))
+                debug("No data to delete: {}".format(object_id))
 
     def list_objects(self):
         """
