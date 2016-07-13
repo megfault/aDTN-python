@@ -3,14 +3,6 @@ from nacl.utils import random as rand
 from nacl.secret import SecretBox
 from nacl.hash import sha256
 from nacl.encoding import HexEncoder
-from logging import basicConfig, debug, DEBUG
-
-basicConfig(filename='aDTN.log', level=DEBUG,
-            format='[%(relativeCreated)8d] %(message)s', )
-
-
-def log(s):
-    debug(s)
 
 
 def generate_iv():
