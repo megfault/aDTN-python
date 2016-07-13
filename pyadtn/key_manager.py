@@ -8,14 +8,15 @@ from argparse import ArgumentParser
 from pyadtn.utils import b2s, s2b
 from pyadtn.settings import DEFAULT_DIR, KEYS_DIR
 
+from logging import basicConfig, debug, DEBUG
+basicConfig(filename='key_manager.log', level=DEBUG,
+            format='[%(relativeCreated)8d] %(message)s', )
+
 
 class KeyManager():
     def __init__(self):
         self.keys = dict()
         self.load_keys()
-
-    def __del__(self):
-        self.save_keys()
 
     def create_key(self, key_id=None):
         key = random(SecretBox.KEY_SIZE)
@@ -23,20 +24,24 @@ class KeyManager():
             h = sha256(key, HexEncoder)
             key_id = h.decode('utf-8')[:16]
         self.keys[key_id] = key
+        self.save_key(key_id)
         return key_id
 
     def get_fake_key(self):
         return random(SecretBox.KEY_SIZE)
 
-    def save_keys(self, directory=DEFAULT_DIR):
+    def save_key(self, key_id, directory=DEFAULT_DIR):
         path = Path(directory + KEYS_DIR)
+        file_path = path.joinpath(key_id + ".key")
+        if not file_path.exists():
+            key = self.keys[key_id]
+            s = b2s(key)
+            with file_path.open('w', encoding='utf-8') as f:
+                f.write(s)
+
+    def save_all_keys(self):
         for key_id in self.keys:
-            file_path = path.joinpath(key_id + ".key")
-            if not file_path.exists():
-                key = self.keys[key_id]
-                s = b2s(key)
-                with file_path.open('w', encoding='utf-8') as f:
-                    f.write(s)
+            self.save_key(key_id)
 
     def load_keys(self, directory=DEFAULT_DIR):
         path = Path(directory + KEYS_DIR)
@@ -46,6 +51,7 @@ class KeyManager():
                     s = f.readline()
                 key = s2b(s)
                 self.keys[file_path.stem] = key
+
 
 def parse_args():
     parser = ArgumentParser(description='Manage aDTN keys')
