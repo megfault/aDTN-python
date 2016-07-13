@@ -30,7 +30,6 @@ class DataStore:
         self.data = self.db.table('messages')
         self.lock = RLock()
 
-
     def add_object(self, data):
         """
         Attempt to insert a data object into the store. If it does not exist, it gets initialized. Otherwise the
@@ -52,14 +51,14 @@ class DataStore:
                                    'last_received': None,
                                    'last_sent': None,
                                    'deleted': False})
-                debug("Data object inserted: {}".format(data))
+                debug("Data object created: {}".format(data))
             else:
                 deleted = res[0]['deleted']
                 if deleted:
                     debug("Received deleted data object: {}".format(data))
-                else:
-                    self.stats.update({'last_received': now}, Stats.idx == idx)
-                    self.stats.update(increment('receive_count'), Stats.idx == idx)
+                self.stats.update({'last_received': now}, Stats.idx == idx)
+                self.stats.update(increment('receive_count'), Stats.idx == idx)
+                debug("Data object updated: {}".format(data))
 
     def get_data(self):
         """
@@ -95,6 +94,7 @@ class DataStore:
             record = self.data.get(Message.idx == object_id)
             if record is not None:
                 self.data.remove(eids=[record.eid])
+                debug("Deleted message: {}".format(object_id))
             else:
                 debug("No data to delete: {}".format(object_id))
 
