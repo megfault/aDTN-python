@@ -1,3 +1,5 @@
+from pathlib import Path
+from os import makedirs
 from tinydb import TinyDB, Query
 from tinydb.operations import increment
 import time
@@ -25,6 +27,9 @@ class DataStore:
         :param db_filename: name of the file where the data is stored
         """
         self.size_threshold = size_threshold
+        path = Path(db_default_dir)
+        if not path.exists():
+            makedirs(path)
         self.db = TinyDB(db_default_dir + "/" + db_filename)
         self.stats = self.db.table('stats')
         self.data = self.db.table('messages')
