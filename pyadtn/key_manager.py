@@ -19,6 +19,7 @@ class KeyManager:
         self.keys_dir = keys_dir
         self.keys = dict()
         self.load_keys()
+        debug("{} keys loaded.".format(len(self.keys)))
 
     def create_key(self, key_id=None):
         key = random(SecretBox.KEY_SIZE)
