@@ -25,7 +25,7 @@ class DataStore:
         :param db_filename: name of the file where the data is stored
         """
         self.size_threshold = size_threshold
-        self.db = TinyDB(db_default_dir + db_filename)
+        self.db = TinyDB(db_default_dir + "/" + db_filename)
         self.stats = self.db.table('stats')
         self.data = self.db.table('messages')
         self.lock = RLock()
