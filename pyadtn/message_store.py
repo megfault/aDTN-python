@@ -29,7 +29,7 @@ class DataStore:
         path = Path(db_filename).parent
         if not path.exists():
             path.mkdir(parents=True)
-        self.db = TinyDB(db_filename)
+        self.db = TinyDB(db_filename + ".json")
         self.stats = self.db.table('stats')
         self.data = self.db.table('messages')
         self.lock = RLock()
