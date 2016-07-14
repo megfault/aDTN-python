@@ -1,5 +1,4 @@
 from pathlib import Path
-from os import makedirs
 from nacl.secret import SecretBox
 from nacl.utils import random
 from nacl.hash import sha256
@@ -19,7 +18,7 @@ class KeyManager:
         self.default_dir = default_dir
         path = Path(self.default_dir)
         if not path.exists():
-            makedirs(path)
+            path.mkdir(parents=True)
         self.keys_dir = keys_dir
         self.keys = dict()
         self.load_keys()
