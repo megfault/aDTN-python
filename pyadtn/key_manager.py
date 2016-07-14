@@ -1,4 +1,5 @@
 from pathlib import Path
+from os import makedirs
 from nacl.secret import SecretBox
 from nacl.utils import random
 from nacl.hash import sha256
@@ -16,6 +17,9 @@ basicConfig(filename='key_manager.log', level=DEBUG,
 class KeyManager:
     def __init__(self, default_dir=DEFAULT_DIR, keys_dir=KEYS_DIR):
         self.default_dir = default_dir
+        path = Path(self.default_dir)
+        if not path.exists():
+            makedirs(path)
         self.keys_dir = keys_dir
         self.keys = dict()
         self.load_keys()
