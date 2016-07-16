@@ -59,7 +59,7 @@ class aDTN:
         self._decrypted_pkt_counter = None
         self._start_time = None
         bind_layers(aDTNPacket, aDTNInnerPacket)
-        bind_layers(Ether, aDTNPacket, type=0xcafe)
+        bind_layers(Ether, aDTNPacket, type=ETHERTYPE)
 
     def _prepare_sending_pool(self):
         """
