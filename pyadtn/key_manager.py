@@ -8,9 +8,8 @@ from argparse import ArgumentParser
 from pyadtn.utils import b2s, s2b
 from pyadtn.settings import DEFAULT_DIR, KEYS_DIR
 
-from logging import basicConfig, debug, DEBUG
-basicConfig(filename='key_manager.log', level=DEBUG,
-            format='[%(relativeCreated)8d] %(message)s', )
+from logging import debug
+
 
 
 class KeyManager:

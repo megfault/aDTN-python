@@ -8,9 +8,7 @@ from argparse import ArgumentParser
 from pyadtn.settings import DEFAULT_DIR, DEFAULT_DATABASE_FN
 from pyadtn.utils import hash_string
 
-from logging import basicConfig, debug, DEBUG
-basicConfig(filename='message_store.log', level=DEBUG,
-            format='[%(relativeCreated)8d] %(message)s', )
+from logging import debug
 
 
 class DataStore:
