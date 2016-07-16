@@ -12,8 +12,8 @@ from pyadtn.message_store import DataStore
 from pyadtn.key_manager import KeyManager
 from pyadtn.aDTN_packet import aDTNPacket, aDTNInnerPacket
 
-ETHERTYPE = "0xcafe"
-FILTER = "ether proto " + ETHERTYPE
+ETHERTYPE = 0xcafe
+FILTER = "ether proto 0xcafe"
 SNIFF_TIMEOUT = 5
 
 basicConfig(filename='aDTN.log', level=DEBUG,
