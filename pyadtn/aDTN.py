@@ -92,7 +92,7 @@ class aDTN:
                 batch.append(Ether(dst="ff:ff:ff:ff:ff:ff", type=0xcafe) / pkt)
                 self._sending_pool.remove(pkt)
             sendp(batch, iface=self._wireless_interface)
-            self._sent_pkt_counter += self._batch_size
+            self._sent_pkt_counter += len(batch)
             self._prepare_sending_pool()
 
     def _process(self, frame):
