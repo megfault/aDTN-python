@@ -168,6 +168,7 @@ class aDTN:
                 self._sending_freq))
             debug("aDTN was stopped.")
         except ValueError:  # In case the popped event started running in the meantime...
+            debug("Scheduler is not empty, retry stopping.")
             self.stop()  # ...call the stop function once more.
 
 
