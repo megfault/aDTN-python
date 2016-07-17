@@ -141,6 +141,7 @@ class aDTN:
         self._sending = True
         self._thread_send = Thread(target=self._scheduler.run, kwargs={"blocking": True})
         self._thread_send.start()
+        debug("aDTN was started.")
 
 
     def stop(self):
@@ -165,6 +166,7 @@ class aDTN:
             info("Running time: {} -- sent: {}, received: {}, decrypted: {}, batch size: {}, sending freq.: {}.".format(
                 uptime, self._sent_pkt_counter, self._received_pkt_counter, self._decrypted_pkt_counter, self._batch_size,
                 self._sending_freq))
+            debug("aDTN was stopped.")
 
 
 def parse_args():
