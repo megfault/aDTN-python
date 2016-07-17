@@ -13,6 +13,9 @@ from logging import debug
 
 
 class KeyManager:
+    """
+
+    """
     def __init__(self, default_dir=DEFAULT_DIR, keys_dir=KEYS_DIR):
         self.default_dir = default_dir
         path = Path(self.default_dir)

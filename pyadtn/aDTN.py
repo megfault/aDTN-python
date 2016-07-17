@@ -155,9 +155,6 @@ class aDTN:
             while not self._scheduler.empty():
                 event = self._scheduler.queue.pop()
                 self._scheduler.cancel(event)
-        except ValueError:  # In case the popped event started running in the meantime...
-            self.stop()  # ...call the stop function once more.
-        else:
             # By now the scheduler has run empty, so join the thread:
             self._thread_send.join()
             # Now we just have to join the receiving thread to stop aDTN completely:
@@ -166,9 +163,12 @@ class aDTN:
             stop_time = time.time()
             uptime = stop_time - self._start_time
             info("Running time: {} -- sent: {}, received: {}, decrypted: {}, batch size: {}, sending freq.: {}.".format(
-                uptime, self._sent_pkt_counter, self._received_pkt_counter, self._decrypted_pkt_counter, self._batch_size,
+                uptime, self._sent_pkt_counter, self._received_pkt_counter, self._decrypted_pkt_counter,
+                self._batch_size,
                 self._sending_freq))
             debug("aDTN was stopped.")
+        except ValueError:  # In case the popped event started running in the meantime...
+            self.stop()  # ...call the stop function once more.
 
 
 def parse_args():
