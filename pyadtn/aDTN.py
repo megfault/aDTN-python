@@ -6,7 +6,7 @@ from threading import Thread
 from argparse import ArgumentParser
 from random import sample
 from atexit import register
-from logging import basicConfig, debug, DEBUG, info, INFO
+from logging import basicConfig, debug, DEBUG, info, INFO, FileHandler, Formatter, getLogger
 
 from pyadtn.message_store import DataStore
 from pyadtn.key_manager import KeyManager
@@ -18,8 +18,11 @@ SNIFF_TIMEOUT = 5
 
 basicConfig(filename='aDTN.log', level=DEBUG,
             format='[%(relativeCreated)8d] %(message)s', )
-basicConfig(filename='aDTN.info', level=INFO,
-            format='[%(relativeCreated)8d] %(message)s', )
+info = FileHandler('aDTN.info')
+info.setLevel(INFO)
+formatter = Formatter('[%(relativeCreated)8d] %(message)s')
+info.setFormatter(formatter)
+getLogger('').addHandler(info)
 
 class aDTN:
     """
