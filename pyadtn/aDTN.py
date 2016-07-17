@@ -6,7 +6,7 @@ from threading import Thread
 from argparse import ArgumentParser
 from random import sample
 from atexit import register
-from logging import basicConfig, debug, DEBUG
+from logging import basicConfig, debug, DEBUG, info, INFO
 
 from pyadtn.message_store import DataStore
 from pyadtn.key_manager import KeyManager
@@ -18,7 +18,8 @@ SNIFF_TIMEOUT = 5
 
 basicConfig(filename='aDTN.log', level=DEBUG,
             format='[%(relativeCreated)8d] %(message)s', )
-
+basicConfig(filename='aDTN.info', level=INFO,
+            format='[%(relativeCreated)8d] %(message)s', )
 
 class aDTN:
     """
@@ -161,7 +162,7 @@ class aDTN:
             self._thread_receive.join()
             stop_time = time.time()
             uptime = stop_time - self._start_time
-            debug("Running time: {} -- sent: {}, received: {}, decrypted: {}, batch size: {}, sending freq.: {}.".format(
+            info("Running time: {} -- sent: {}, received: {}, decrypted: {}, batch size: {}, sending freq.: {}.".format(
                 uptime, self._sent_pkt_counter, self._received_pkt_counter, self._decrypted_pkt_counter, self._batch_size,
                 self._sending_freq))
 
