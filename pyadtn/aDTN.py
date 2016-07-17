@@ -134,12 +134,13 @@ class aDTN:
         self._decrypted_pkt_counter = 0
         self._prepare_sending_pool()
         self._scheduler.enter(self._sending_freq, 1, self._send)
-        self._sending = True
-        self._thread_send = Thread(target=self._scheduler.run, kwargs={"blocking": True})
-        self._thread_send.start()
         self._sniffing = True
         self._thread_receive = Thread(target=self._sniff)
         self._thread_receive.start()
+        self._sending = True
+        self._thread_send = Thread(target=self._scheduler.run, kwargs={"blocking": True})
+        self._thread_send.start()
+
 
     def stop(self):
         """
