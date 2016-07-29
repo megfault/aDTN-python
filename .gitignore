@@ -1,7 +1,8 @@
 *.pyc
 *.swp
 *.swo
-*.log
+tests/*.log
+test/*.json
 .coverage
 .ropeproject/*
 .idea/*
