@@ -174,10 +174,24 @@ class aDTN:
             self._thread_receive.join()
             stop_time = time.time()
             uptime = stop_time - self._start_time
-            info("Running time: {} -- sent: {}, received: {}, decrypted: {}, batch size: {}, sending freq.: {}.".format(
-                uptime, self._sent_pkt_counter, self._received_pkt_counter, self._decrypted_pkt_counter,
-                self._batch_size,
-                self._sending_freq))
+            info(",".join(["batch size",
+                           "sending freq",
+                           "fps",
+                           "running time",
+                           "sent",
+                           "sending rate",
+                           "all received",
+                           "receiving rate",
+                           "decrypted"]))
+            info("{},{},{},{},{},{},{},{},{}".format(self._batch_size,
+                                                           self._sending_freq,
+                                                           60/self._sending_freq,
+                                                           uptime,
+                                                           self._sent_pkt_counter,
+                                                           self._sent_pkt_counter/uptime,
+                                                           self._received_pkt_counter,
+                                                           self._received_pkt_counter/uptime,
+                                                           self._decrypted_pkt_counter))
             debug("aDTN was stopped.")
         except ValueError:  # In case the popped event started running in the meantime...
             debug("Scheduler is not empty, retry stopping.")
