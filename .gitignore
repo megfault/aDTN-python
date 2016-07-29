@@ -2,6 +2,7 @@
 *.swp
 *.swo
 *.log
+.coverage
 .ropeproject/*
 .idea/*
 .cache/*
