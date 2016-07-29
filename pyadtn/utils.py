@@ -4,7 +4,6 @@ from nacl.secret import SecretBox
 from nacl.hash import sha256
 from nacl.encoding import HexEncoder
 from random import randint
-from itertools import repeat
 
 
 def generate_iv():
@@ -72,7 +71,7 @@ def random_mac_address():
     :return: string containing a random MAC address
     """
     def generate_n_hexdigit_pairs(n):
-        for _ in repeat(None, n):
+        for _ in range(n):
             s = hex(randint(0, 255))[2:]
             if len(s) == 1:
                 s = "0" + s
