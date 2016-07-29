@@ -1,5 +1,8 @@
 *.pyc
 *.swp
 *.swo
+*.log
 .ropeproject/*
-
+.idea/*
+.cache/*
+pyadtn.egg-info/*
