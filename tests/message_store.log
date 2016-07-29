@@ -1,0 +1,62 @@
+[   12572] Sent batch
+[   12774] Data object inserted: ohai: 0
+[   12882] Data object inserted: ohai: 1
+[   12975] Data object inserted: ohai: 2
+[   13093] Data object inserted: ohai: 3
+[   13190] Data object inserted: ohai: 4
+[   13199] Sent batch
+[   22480] Key d73d20a0b796ee16 was created.
+[   22481] Key d73d20a0b796ee16 was written to disk
+[   22483] Key 6d632ebf517d1a9f was created.
+[   22483] Key 6d632ebf517d1a9f was written to disk
+[   22485] Key 3159ec7cc20ec611 was created.
+[   22485] Key 3159ec7cc20ec611 was written to disk
+[   22494] Data object inserted: test
+[   22497] Data object inserted: test
+[   22501] Data object inserted: test
+[   22504] Data object inserted: test
+[   22505] Received deleted data object: test
+[   22508] Data object inserted: test
+[      13] Data object inserted: test
+[      17] Data object inserted: test
+[      22] Data object inserted: test
+[      26] Data object inserted: test
+[      27] Received deleted data object: test
+[      30] Data object inserted: test
+[       7] Data object inserted: test
+[      11] Data object inserted: test
+[      15] Data object inserted: test
+[      19] Data object inserted: test
+[      19] Received deleted data object: test
+[      22] Data object inserted: test
+[   11306] Running time: 10.017780542373657 -- sent: 0, received: 0, decrypted: 0.
+[   11403] Sent batch of size 10.
+[   11560] Data object inserted: ohai: 0
+[   11662] Data object inserted: ohai: 1
+[   11765] Data object inserted: ohai: 2
+[   11878] Data object inserted: ohai: 3
+[   11986] Data object inserted: ohai: 4
+[   11994] Sent batch of size 10.
+[   21333] Running time: 10.023226737976074 -- sent: 20, received: 0, decrypted: 0.
+[   11274] Running time: 10.017765522003174 -- sent: 0, received: 0, decrypted: 0, batch size: 10, sending freq.: 10.
+[   11491] Data object created: ohai: 0
+[   11589] Data object created: ohai: 1
+[   11691] Data object created: ohai: 2
+[   11802] Data object created: ohai: 3
+[   11904] Data object created: ohai: 4
+[   21292] Running time: 10.014445781707764 -- sent: 20, received: 0, decrypted: 0, batch size: 10, sending freq.: 10.
+[   21295] Key 1d45f1f23bad6378 was created.
+[   21295] Key 1d45f1f23bad6378 was written to disk
+[   21297] Key e48445785eba9f25 was created.
+[   21298] Key e48445785eba9f25 was written to disk
+[   21300] Key 8092fc6e3edde48e was created.
+[   21300] Key 8092fc6e3edde48e was written to disk
+[   21311] Data object created: test
+[   21315] Data object created: test
+[   21319] Data object created: test
+[   21323] Data object created: test
+[   21323] Deleted message: 9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08
+[   21324] Received deleted data object: test
+[   21324] Data object updated: test
+[   21327] Data object created: test
+[   21328] Data object updated: test
