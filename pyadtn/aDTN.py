@@ -11,9 +11,11 @@ from logging import basicConfig, DEBUG, INFO, FileHandler, Formatter, getLogger
 from pyadtn.message_store import DataStore
 from pyadtn.key_manager import KeyManager
 from pyadtn.aDTN_packet import aDTNPacket, aDTNInnerPacket
+from pyadtn.utils import random_mac_address
 
+MAC_ADDR = random_mac_address()
 ETHERTYPE = 0xcafe
-FILTER = "ether proto 0xcafe"
+FILTER = "ether proto 0xcafe and not ether src " + MAC_ADDR
 SNIFF_TIMEOUT = 5
 
 basicConfig(filename='aDTN.log', level=DEBUG,
@@ -102,7 +104,7 @@ class aDTN:
             batch = []
             s = sample(self._sending_pool, self._batch_size)
             for pkt in s:
-                batch.append(Ether(dst="ff:ff:ff:ff:ff:ff", type=ETHERTYPE) / pkt)
+                batch.append(Ether(dst="ff:ff:ff:ff:ff:ff", src=MAC_ADDR, type=ETHERTYPE) / pkt)
                 self._sending_pool.remove(pkt)
             sendp(batch, iface=self._wireless_interface)
             self._sent_pkt_counter += len(batch)
