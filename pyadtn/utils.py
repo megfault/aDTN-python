@@ -3,6 +3,7 @@ from nacl.utils import random as rand
 from nacl.secret import SecretBox
 from nacl.hash import sha256
 from nacl.encoding import HexEncoder
+from random import randint
 
 
 def generate_iv():
@@ -64,3 +65,17 @@ def s2b(s):
     return unhexlify(s.encode('utf-8'))
 
 
+def random_mac_address():
+    """
+    Generate a random MAC address
+    :return: string containing a random MAC address
+    """
+    def generate_6_hexdigit_pairs():
+        n = 0
+        while n < 6:
+            s = hex(randint(0, 255))[2:]
+            if len(s) == 1:
+                s = "0" + s
+            yield s
+            n += 1
+    return ":".join(generate_6_hexdigit_pairs())
