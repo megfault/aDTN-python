@@ -18,13 +18,16 @@ ETHERTYPE = 0xcafe
 FILTER = "ether proto 0xcafe and not ether src " + MAC_ADDR
 SNIFF_TIMEOUT = 5
 
-basicConfig(filename='aDTN.log', level=DEBUG,
-            format='[%(relativeCreated)8d] %(message)s', )
+formatter = Formatter('[%(relativeCreated)8d] %(message)s')
+debug_fh = FileHandler('aDTN.log')
+debug_fh.setLevel(DEBUG)
+debug_fh.setFormatter(formatter)
 info_fh = FileHandler('aDTN.info')
 info_fh.setLevel(INFO)
-formatter = Formatter('[%(relativeCreated)8d] %(message)s')
 info_fh.setFormatter(formatter)
-getLogger('').addHandler(info_fh)
+logger = getLogger('')
+logger.addHandler(debug_fh)
+logger.addHandler(info_fh)
 
 
 def info(x):
