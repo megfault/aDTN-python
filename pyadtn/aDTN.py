@@ -92,7 +92,7 @@ class aDTN:
                 self._sending_pool.remove(pkt)
             sendp(batch, iface=self._wireless_interface)
             self._sent_pkt_counter += len(batch)
-            debug("Sent {} pakets. Total {} packets sent.".format(len(batch), self._sent_pkt_counter))
+            debug("Sent {} packets. Total {} packets sent.".format(len(batch), self._sent_pkt_counter))
             self._prepare_sending_pool()
 
     def _process(self, frame):
@@ -104,7 +104,7 @@ class aDTN:
         """
         payload = frame.payload.load
         self._received_pkt_counter += 1
-        debug("Received a packet. Total {} pakets received.".format(self._received_pkt_counter))
+        debug("Received a packet. Total {} packets received.".format(self._received_pkt_counter))
         for key in self._km.keys.values():
             try:
                 ap = aDTNPacket(key=key)
