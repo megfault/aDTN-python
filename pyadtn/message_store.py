@@ -5,10 +5,8 @@ import time
 from threading import RLock
 from argparse import ArgumentParser
 
-from pyadtn.settings import DEFAULT_DIR, DEFAULT_DATABASE_FN
-from pyadtn.utils import hash_string
-
-from logging import debug
+from pyadtn.settings import DEFAULT_DATABASE_FN
+from pyadtn.utils import hash_string, debug
 
 
 class DataStore:

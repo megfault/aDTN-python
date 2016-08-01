@@ -4,6 +4,24 @@ from nacl.secret import SecretBox
 from nacl.hash import sha256
 from nacl.encoding import HexEncoder
 from random import randint
+from logging import basicConfig, DEBUG, INFO, FileHandler, Formatter, getLogger
+
+
+basicConfig(filename='aDTN.log', level=DEBUG,
+            format='[%(relativeCreated)8d] %(message)s', )
+info_fh = FileHandler('aDTN.info')
+info_fh.setLevel(INFO)
+formatter = Formatter('[%(relativeCreated)8d] %(message)s')
+info_fh.setFormatter(formatter)
+getLogger('').addHandler(info_fh)
+
+
+def info(x):
+    getLogger('').info(x)
+
+
+def debug(x):
+    getLogger('').debug(x)
 
 
 def generate_iv():

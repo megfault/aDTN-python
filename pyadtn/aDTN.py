@@ -6,34 +6,16 @@ from threading import Thread
 from argparse import ArgumentParser
 from random import sample
 from atexit import register
-from logging import basicConfig, DEBUG, INFO, FileHandler, Formatter, getLogger
 
 from pyadtn.message_store import DataStore
 from pyadtn.key_manager import KeyManager
 from pyadtn.aDTN_packet import aDTNPacket, aDTNInnerPacket
-from pyadtn.utils import random_mac_address
+from pyadtn.utils import random_mac_address, info, debug
 
 MAC_ADDR = random_mac_address()
 ETHERTYPE = 0xcafe
 FILTER = "ether proto 0xcafe and not ether src " + MAC_ADDR
 SNIFF_TIMEOUT = 5
-
-basicConfig(filename='aDTN.log', level=DEBUG,
-            format='[%(relativeCreated)8d] %(message)s', )
-info_fh = FileHandler('aDTN.info')
-info_fh.setLevel(INFO)
-formatter = Formatter('[%(relativeCreated)8d] %(message)s')
-info_fh.setFormatter(formatter)
-getLogger('').addHandler(info_fh)
-
-
-def info(x):
-    getLogger('').info(x)
-
-
-def debug(x):
-    getLogger('').debug(x)
-
 
 class aDTN:
     """
