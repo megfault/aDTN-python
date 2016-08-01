@@ -143,7 +143,6 @@ class aDTN:
         self._thread_send.start()
         debug("aDTN was started.")
 
-
     def stop(self):
         """
         Stop aDTN. Make sure the two threads created at start are finished properly.
