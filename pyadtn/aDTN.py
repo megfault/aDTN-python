@@ -75,6 +75,7 @@ class aDTN:
         self._start_time = None
         bind_layers(aDTNPacket, aDTNInnerPacket)
         bind_layers(Ether, aDTNPacket, type=ETHERTYPE)
+        debug("MAC address in use: {}".format(MAC_ADDR))
 
     def _prepare_sending_pool(self):
         """
