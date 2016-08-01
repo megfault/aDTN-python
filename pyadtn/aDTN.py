@@ -175,6 +175,7 @@ class aDTN:
             # Now we just have to join the receiving thread to stop aDTN completely:
             self._sniffing = False
             self._thread_receive.join()
+            debug("aDTN was stopped.")
             stop_time = time.time()
             uptime = stop_time - self._start_time
             info(",".join(["batch size",
@@ -195,7 +196,6 @@ class aDTN:
                                                            self._received_pkt_counter,
                                                            self._received_pkt_counter/uptime,
                                                            self._decrypted_pkt_counter))
-            debug("aDTN was stopped.")
         except ValueError:  # In case the popped event started running in the meantime...
             debug("Scheduler is not empty, retry stopping.")
             self.stop()  # ...call the stop function once more.
