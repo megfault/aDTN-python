@@ -171,7 +171,7 @@ class aDTN:
                            "decrypted"]))
             info("{},{},{},{},{},{},{},{},{}".format(self._batch_size,
                                                            self._sending_freq,
-                                                           60/self._sending_freq,
+                                                           self._batch_size/self._sending_freq,
                                                            uptime,
                                                            self._sent_pkt_counter,
                                                            self._sent_pkt_counter/uptime,
