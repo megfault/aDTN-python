@@ -17,6 +17,7 @@ ETHERTYPE = 0xcafe
 FILTER = "ether proto 0xcafe and not ether src " + MAC_ADDR
 SNIFF_TIMEOUT = 5
 
+
 class aDTN:
     """
     Receives and sends aDTN packets.
