@@ -6,15 +6,15 @@ from threading import Thread
 from argparse import ArgumentParser
 from random import sample
 from atexit import register
+from pyric.pyw import macget, getcard
 
 from pyadtn.message_store import DataStore
 from pyadtn.key_manager import KeyManager
 from pyadtn.aDTN_packet import aDTNPacket, aDTNInnerPacket
 from pyadtn.utils import random_mac_address, info, debug
 
-MAC_ADDR = random_mac_address()
 ETHERTYPE = 0xcafe
-FILTER = "ether proto 0xcafe and not ether src " + MAC_ADDR
+FILTER = "ether proto 0xcafe and not ether src "
 SNIFF_TIMEOUT = 5
 
 
@@ -56,9 +56,10 @@ class aDTN:
         self._received_pkt_counter = None
         self._decrypted_pkt_counter = None
         self._start_time = None
+        self._mac_address = macget(getcard(wireless_interface))
         bind_layers(aDTNPacket, aDTNInnerPacket)
         bind_layers(Ether, aDTNPacket, type=ETHERTYPE)
-        debug("MAC address in use: {}".format(MAC_ADDR))
+        debug("MAC address in use: {}".format(self._mac_address))
 
     def _prepare_sending_pool(self):
         """
@@ -88,7 +89,7 @@ class aDTN:
             batch = []
             s = sample(self._sending_pool, self._batch_size)
             for pkt in s:
-                batch.append(Ether(dst="ff:ff:ff:ff:ff:ff", src=MAC_ADDR, type=ETHERTYPE) / pkt)
+                batch.append(Ether(dst="ff:ff:ff:ff:ff:ff", src=self._mac_address, type=ETHERTYPE) / pkt)
                 self._sending_pool.remove(pkt)
             sendp(batch, iface=self._wireless_interface)
             self._sent_pkt_counter += len(batch)
@@ -121,7 +122,7 @@ class aDTN:
         while True:
             if self._sniffing is False:
                 return
-            sniff(iface=self._wireless_interface, prn=self._process, filter=FILTER, store=0, timeout=SNIFF_TIMEOUT)
+            sniff(iface=self._wireless_interface, prn=self._process, filter=FILTER + self._mac_address, store=0, timeout=SNIFF_TIMEOUT)
 
     def start(self):
         """
