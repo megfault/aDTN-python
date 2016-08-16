@@ -156,6 +156,7 @@ class aDTN:
             # By now the scheduler has run empty, so join the thread:
             self._thread_send.join()
             # Now we just have to join the receiving thread to stop aDTN completely:
+            time.sleep()
             self._sniffing = False
             self._thread_receive.join()
             stop_time = time.time()
@@ -190,7 +191,7 @@ def parse_args():
     """
     parser = ArgumentParser(description='Run an aDTN simulation instance.')
     parser.add_argument('batch_size', type=int, help='how many messages to send in a batch')
-    parser.add_argument('sending_freq', type=int, help='interval (in s) between sending a batch')
+    parser.add_argument('sending_freq', type=float, help='interval (in s) between sending a batch')
     parser.add_argument('wireless_interface', type=str, help='name of the wireless interface')
     parser.add_argument('data_store', type=str, default=None, help="file storing the data objects")
     return parser.parse_args()
