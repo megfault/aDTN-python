@@ -156,7 +156,6 @@ class aDTN:
             # By now the scheduler has run empty, so join the thread:
             self._thread_send.join()
             # Now we just have to join the receiving thread to stop aDTN completely:
-            time.sleep()
             self._sniffing = False
             self._thread_receive.join()
             stop_time = time.time()
