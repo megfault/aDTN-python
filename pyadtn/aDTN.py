@@ -11,7 +11,7 @@ from pyric.pyw import macget, getcard
 from pyadtn.message_store import DataStore
 from pyadtn.key_manager import KeyManager
 from pyadtn.aDTN_packet import aDTNPacket, aDTNInnerPacket
-from pyadtn.utils import random_mac_address, info, debug
+from pyadtn.utils import info, debug
 
 ETHERTYPE = 0xcafe
 FILTER = "ether proto 0xcafe and not ether src "
