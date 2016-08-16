@@ -9,10 +9,10 @@ from logging import basicConfig, DEBUG, INFO, FileHandler, Formatter, getLogger
 
 
 basicConfig(filename='aDTN.log', level=DEBUG,
-            format='[%(relativeCreated)8d] %(threadName)s (%(thread)d) -- %(message)s', )
+            format='[%(created)f] %(threadName)s (%(thread)d) -- %(message)s', )
 info_fh = FileHandler('aDTN.info')
 info_fh.setLevel(INFO)
-formatter = Formatter('[%(relativeCreated)8d] %(threadName)s (%(thread)d) --  %(message)s')
+formatter = Formatter('[%(created)f -- %(asctime)s] %(threadName)s (%(thread)d) --  %(message)s')
 info_fh.setFormatter(formatter)
 getLogger('').addHandler(info_fh)
 
