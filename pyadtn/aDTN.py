@@ -143,7 +143,7 @@ class aDTN:
         self._sending = True
         self._thread_send = Thread(target=self._scheduler.run, name="SendingThread", kwargs={"blocking": True})
         self._thread_send.start()
-        log_network("start")
+        log_network("start-{}-{}".format(self._batch_size, self._sending_freq))
 
     def stop(self):
         """
