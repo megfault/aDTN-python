@@ -8,9 +8,9 @@ import fcntl, socket, struct
 from logging import basicConfig, DEBUG, INFO, FileHandler, Formatter, getLogger
 
 
-basicConfig(filename='aDTN.log', level=DEBUG,
+basicConfig(filename='debug.log', level=DEBUG,
             format='[%(created)f] %(threadName)s (%(thread)d) -- %(message)s', )
-network_fh = FileHandler('aDTN.network')
+network_fh = FileHandler('network_events.log')
 network_fh.setLevel(INFO)
 formatter = Formatter('[%(asctime)s] %(message)s')
 network_fh.setFormatter(formatter)
