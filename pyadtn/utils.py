@@ -28,24 +28,16 @@ def log_debug(x):
         getLogger('').debug(x)
 
 
-def generate_iv():
-    """
-    Generate a random initialization vector of appropriate length for Salsa20.
-    :return: random bytestring the size of a Salsa20 nonce (24 bytes)
-    """
-    return rand(SecretBox.NONCE_SIZE)
-
-
-def encrypt(plaintext, key, nonce_generator=generate_iv):
+def encrypt(plaintext, key):
     """
     Encrypt a bytestring with the given key using the Salsa20 algorithm.
     Encryption uses a new nonce by default, but can be overridden in case one needs a custom nonce.
     :param plaintext: bytestring to encrypt
     :param key: a 32 byte long bytestring
-    :param nonce_generator: a function that returns a 24 byte long bytestring
     :return: bytestring containing the ciphertext
     """
-    return SecretBox(key).encrypt(plaintext, nonce_generator())
+    nonce = rand(SecretBox.NONCE_SIZE)
+    return SecretBox(key).encrypt(plaintext, nonce)
 
 
 def decrypt(ciphertext, key):
