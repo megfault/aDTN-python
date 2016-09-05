@@ -10,18 +10,18 @@ from logging import basicConfig, DEBUG, INFO, FileHandler, Formatter, getLogger
 
 basicConfig(filename='aDTN.log', level=DEBUG,
             format='[%(created)f] %(threadName)s (%(thread)d) -- %(message)s', )
-info_fh = FileHandler('aDTN.info')
-info_fh.setLevel(INFO)
-formatter = Formatter('[%(created)f -- %(asctime)s] %(threadName)s (%(thread)d) --  %(message)s')
-info_fh.setFormatter(formatter)
-getLogger('').addHandler(info_fh)
+network_fh = FileHandler('aDTN.network')
+network_fh.setLevel(INFO)
+formatter = Formatter('[%(asctime)s] %(message)s')
+network_fh.setFormatter(formatter)
+getLogger('').addHandler(network_fh)
 
 
-def info(x):
+def log_network(x):
     getLogger('').info(x)
 
 
-def debug(x):
+def log_debug(x):
     getLogger('').debug(x)
 
 
@@ -52,7 +52,12 @@ def decrypt(ciphertext, key):
     :param key: a 32 byte long bytestring
     :return: resulting plaintext
     """
-    return SecretBox(key).decrypt(ciphertext)
+    sb = SecretBox(key)
+    try:
+        return sb.decrypt(ciphertext)
+    except ValueError:
+        debug("Nonce is invalid, probably wrong size.")
+        raise Exception
 
 
 def hash_string(s):

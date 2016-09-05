@@ -5,7 +5,7 @@ from nacl.hash import sha256
 from nacl.encoding import HexEncoder
 from argparse import ArgumentParser
 
-from pyadtn.utils import b2s, s2b, debug
+from pyadtn.utils import b2s, s2b, log_debug
 from pyadtn.settings import DEFAULT_DIR, KEYS_DIR
 
 
@@ -21,7 +21,7 @@ class KeyManager:
         self.keys_dir = keys_dir
         self.keys = dict()
         self.load_keys()
-        debug("{} keys loaded.".format(len(self.keys)))
+        log_debug("{} keys loaded.".format(len(self.keys)))
 
     def create_key(self, key_id=None):
         key = random(SecretBox.KEY_SIZE)
@@ -29,7 +29,7 @@ class KeyManager:
             h = sha256(key, HexEncoder)
             key_id = h.decode('utf-8')[:16]
         self.keys[key_id] = key
-        debug("Key {} was created.".format(key_id))
+        log_debug("Key {} was created.".format(key_id))
         self.save_key(key_id)
         return key_id
 
@@ -44,7 +44,7 @@ class KeyManager:
             s = b2s(key)
             with file_path.open('w', encoding='utf-8') as f:
                 f.write(s)
-            debug("Key {} was written to disk".format(key_id))
+            log_debug("Key {} was written to disk".format(key_id))
 
     def save_all_keys(self):
         for key_id in self.keys:

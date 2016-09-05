@@ -6,7 +6,7 @@ from threading import RLock
 from argparse import ArgumentParser
 
 from pyadtn.settings import DEFAULT_DATABASE_FN
-from pyadtn.utils import hash_string, debug
+from pyadtn.utils import hash_string, log_debug
 
 
 class DataStore:
@@ -58,7 +58,7 @@ class DataStore:
                     debug("Received deleted data object: {}".format(data))
                 self.stats.update({'last_received': now}, Stats.idx == idx)
                 self.stats.update(increment('receive_count'), Stats.idx == idx)
-                debug("Data object updated: {}".format(data))
+                log_debug("Data object updated: {}".format(data))
 
     def get_data(self):
         """
@@ -94,9 +94,9 @@ class DataStore:
             record = self.data.get(Message.idx == object_id)
             if record is not None:
                 self.data.remove(eids=[record.eid])
-                debug("Deleted message: {}".format(object_id))
+                log_debug("Deleted message: {}".format(object_id))
             else:
-                debug("No data to delete: {}".format(object_id))
+                log_debug("No data to delete: {}".format(object_id))
 
     def list_objects(self):
         """
