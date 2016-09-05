@@ -59,7 +59,7 @@ def decrypt(ciphertext, key):
     try:
         return sb.decrypt(ciphertext)
     except ValueError:
-        debug("Nonce is invalid, probably wrong size.")
+        log_debug("Nonce is invalid, probably wrong size.")
         raise Exception
 
 
