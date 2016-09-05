@@ -51,11 +51,11 @@ class DataStore:
                                    'last_received': None,
                                    'last_sent': None,
                                    'deleted': False})
-                debug("Data object created: {}".format(data))
+                log_debug("Data object created: {}".format(data))
             else:
                 deleted = res[0]['deleted']
                 if deleted:
-                    debug("Received deleted data object: {}".format(data))
+                    log_debug("Received deleted data object: {}".format(data))
                 self.stats.update({'last_received': now}, Stats.idx == idx)
                 self.stats.update(increment('receive_count'), Stats.idx == idx)
                 log_debug("Data object updated: {}".format(data))
