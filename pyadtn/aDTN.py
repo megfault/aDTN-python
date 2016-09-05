@@ -93,7 +93,7 @@ class aDTN:
                 self._sending_pool.remove(pkt)
             sendp(batch, iface=self._wireless_interface)
             self._sent_pkt_counter += len(batch)
-            log_network("snt:{}".format(len(batch)))
+            log_network("snt {}".format(len(batch)))
             self._prepare_sending_pool()
 
     def _process(self, frame):
@@ -105,7 +105,6 @@ class aDTN:
         """
         payload = frame.payload.load
         self._received_pkt_counter += 1
-        log_network("rcv")
         for key in self._km.keys.values():
             try:
                 ap = aDTNPacket(key=key)
@@ -113,9 +112,12 @@ class aDTN:
                 msg = ap.payload.payload.load.decode('utf-8')
                 self._decrypted_pkt_counter += 1
                 self.data_store.add_object(msg)
-                return
+                log_network("rcv OK")
             except CryptoError:
+                log_network("rcv NO_KEY")
                 pass
+            except ValueError:
+                log_debug("invalid nonce")
 
     def _sniff(self):
         """ Wrapper for packet sniffing. """

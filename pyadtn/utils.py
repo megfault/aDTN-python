@@ -48,11 +48,7 @@ def decrypt(ciphertext, key):
     :return: resulting plaintext
     """
     sb = SecretBox(key)
-    try:
-        return sb.decrypt(ciphertext)
-    except ValueError:
-        log_debug("Nonce is invalid, probably wrong size.")
-        raise Exception
+    return sb.decrypt(ciphertext)
 
 
 def hash_string(s):
