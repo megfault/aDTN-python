@@ -6,23 +6,26 @@ from nacl.encoding import HexEncoder
 from random import randint
 import fcntl, socket, struct
 from logging import basicConfig, DEBUG, INFO, FileHandler, Formatter, getLogger
+from threading import RLock
 
 
 basicConfig(filename='debug.log', level=DEBUG,
             format='[%(created)f] %(threadName)s (%(thread)d) -- %(message)s', )
 network_fh = FileHandler('network_events.log')
 network_fh.setLevel(INFO)
-formatter = Formatter('[%(asctime)s] %(message)s')
+formatter = Formatter('[%(created)f] %(message)s')
 network_fh.setFormatter(formatter)
 getLogger('').addHandler(network_fh)
-
+lock = RLock()
 
 def log_network(x):
-    getLogger('').info(x)
+    with lock:
+        getLogger('').info(x)
 
 
 def log_debug(x):
-    getLogger('').debug(x)
+    with lock:
+        getLogger('').debug(x)
 
 
 def generate_iv():
