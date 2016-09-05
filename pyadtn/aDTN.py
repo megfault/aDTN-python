@@ -11,7 +11,7 @@ from pyric.pyw import macget, getcard
 from pyadtn.message_store import DataStore
 from pyadtn.key_manager import KeyManager
 from pyadtn.aDTN_packet import aDTNPacket, aDTNInnerPacket
-from pyadtn.utils import info, debug
+from pyadtn.utils import log_network, log_debug
 
 ETHERTYPE = 0xcafe
 FILTER = "ether proto 0xcafe and not ether src "
@@ -59,7 +59,7 @@ class aDTN:
         self._mac_address = macget(getcard(wireless_interface))
         bind_layers(aDTNPacket, aDTNInnerPacket)
         bind_layers(Ether, aDTNPacket, type=ETHERTYPE)
-        debug("MAC address in use: {}".format(self._mac_address))
+        log_debug("MAC address in use: {}".format(self._mac_address))
 
     def _prepare_sending_pool(self):
         """
@@ -93,7 +93,7 @@ class aDTN:
                 self._sending_pool.remove(pkt)
             sendp(batch, iface=self._wireless_interface)
             self._sent_pkt_counter += len(batch)
-            debug("Sent {} packets. Total {} packets sent.".format(len(batch), self._sent_pkt_counter))
+            log_network("snt:{}".format(len(batch)))
             self._prepare_sending_pool()
 
     def _process(self, frame):
@@ -105,7 +105,7 @@ class aDTN:
         """
         payload = frame.payload.load
         self._received_pkt_counter += 1
-        debug("Received a packet. Total {} packets received.".format(self._received_pkt_counter))
+        log_network("rcv")
         for key in self._km.keys.values():
             try:
                 ap = aDTNPacket(key=key)
@@ -122,7 +122,8 @@ class aDTN:
         while True:
             if self._sniffing is False:
                 return
-            sniff(iface=self._wireless_interface, prn=self._process, filter=FILTER + self._mac_address, store=0, timeout=SNIFF_TIMEOUT)
+            sniff(iface=self._wireless_interface, prn=self._process, filter=FILTER + self._mac_address, store=0,
+                  timeout=SNIFF_TIMEOUT)
 
     def start(self):
         """
@@ -142,7 +143,7 @@ class aDTN:
         self._sending = True
         self._thread_send = Thread(target=self._scheduler.run, name="SendingThread", kwargs={"blocking": True})
         self._thread_send.start()
-        debug("aDTN was started.")
+        log_network("start")
 
     def stop(self):
         """
@@ -158,29 +159,9 @@ class aDTN:
             # Now we just have to join the receiving thread to stop aDTN completely:
             self._sniffing = False
             self._thread_receive.join()
-            stop_time = time.time()
-            uptime = stop_time - self._start_time
-            info(",".join(["batch size",
-                           "sending freq",
-                           "fps",
-                           "running time",
-                           "sent",
-                           "sending rate",
-                           "all received",
-                           "receiving rate",
-                           "decrypted"]))
-            info("{},{},{},{},{},{},{},{},{}".format(self._batch_size,
-                                                     self._sending_freq,
-                                                     self._batch_size/self._sending_freq,
-                                                     uptime,
-                                                     self._sent_pkt_counter,
-                                                     self._sent_pkt_counter/uptime,
-                                                     self._received_pkt_counter,
-                                                     self._received_pkt_counter/uptime,
-                                                     self._decrypted_pkt_counter))
-            debug("aDTN was stopped.")
+            log_network("stop")
         except ValueError:  # In case the popped event started running in the meantime...
-            debug("Scheduler is not empty, retry stopping.")
+            log_debug("Scheduler is not empty, retry stopping.")
             self.stop()  # ...call the stop function once more.
 
 
