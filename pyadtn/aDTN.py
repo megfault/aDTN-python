@@ -1,6 +1,6 @@
 from nacl.exceptions import CryptoError
 from scapy.all import Ether, sendp, sniff, bind_layers
-import time
+from time import time, sleep
 import sched
 from threading import Thread
 from argparse import ArgumentParser
@@ -47,7 +47,7 @@ class aDTN:
         self._km = KeyManager()
         self.data_store = DataStore(data_store)
         self._sending_pool = []
-        self._scheduler = sched.scheduler(time.time, time.sleep)
+        self._scheduler = sched.scheduler(time, sleep)
         self._sending = None
         self._sniffing = None
         self._thread_send = None
@@ -134,7 +134,7 @@ class aDTN:
         Ethernet frames are filtered for ethertype and processed if they match the 0xcafe type. The sending thread runs
         a scheduler for periodic sending of aDTN packets.
         """
-        self._start_time = time.time()
+        self._start_time = time()
         self._sent_pkt_counter = 0
         self._received_pkt_counter = 0
         self._decrypted_pkt_counter = 0
@@ -143,6 +143,7 @@ class aDTN:
         self._sniffing = True
         self._thread_receive = Thread(target=self._sniff, name="ReceivingThread")
         self._thread_receive.start()
+        sleep(5)
         self._sending = True
         self._thread_send = Thread(target=self._scheduler.run, name="SendingThread", kwargs={"blocking": True})
         self._thread_send.start()
