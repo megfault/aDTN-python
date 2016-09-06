@@ -113,11 +113,12 @@ class aDTN:
                 self._decrypted_pkt_counter += 1
                 self.data_store.add_object(msg)
                 log_network("rcv OK")
+                return
             except CryptoError:
-                log_network("rcv NO_KEY")
                 pass
             except ValueError:
                 log_debug("invalid nonce")
+        log_network("rcv NO_KEY")
 
     def _sniff(self):
         """ Wrapper for packet sniffing. """
