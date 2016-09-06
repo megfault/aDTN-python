@@ -142,12 +142,12 @@ class aDTN:
         self._scheduler.enter(self._sending_freq, 1, self._send)
         self._sniffing = True
         self._thread_receive = Thread(target=self._sniff, name="ReceivingThread")
-        self._thread_receive.start()
-        sleep(5)
         self._sending = True
         self._thread_send = Thread(target=self._scheduler.run, name="SendingThread", kwargs={"blocking": True})
-        self._thread_send.start()
         log_network("start-{}-{}".format(self._batch_size, self._sending_freq))
+        self._thread_receive.start()
+        sleep(5)
+        self._thread_send.start()
 
     def stop(self):
         """
