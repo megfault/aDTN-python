@@ -58,6 +58,7 @@ class KeyManager:
                     s = f.readline()
                 key = s2b(s)
                 self.keys[file_path.stem] = key
+                log_debug("Loaded {} key: {}".format(file_path.stem, key))
 
 
 def parse_args():
