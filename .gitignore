@@ -1,6 +1,7 @@
 *.pyc
 *.swp
 *.swo
+*.log
 tests/*.log
 tests/*.json
 tests/data/keys/*.key
