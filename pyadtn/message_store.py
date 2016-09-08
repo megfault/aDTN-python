@@ -60,26 +60,36 @@ class DataStore:
                 self.stats.update(increment('receive_count'), Stats.idx == idx)
                 log_debug("Data object updated: {}".format(data))
 
-    def get_data(self, n=1):
+    def get_hashes(self, n):
         """
-        Retrieve the data objects sorted by increasing popularity, namely in increasing receive_count, then send_count
-        and finally the last time they were sent by the current aDTN node.
-        :param n: number of objects to return, default is 1
-        :return: n data objects sorted by increasing popularity
+        Retrieve the hashes of the data objects sorted by increasing popularity, namely in increasing receive_count,
+        then send_count and finally the last time they were sent by the current aDTN node.
+        :param n: number of hashes to return
+        :return: n hashes of data objects sorted by their increasing popularity
         """
         with self.lock:
             Stats = Query()
             stats = self.stats.search(Stats.deleted == False)
-            res = sorted(stats, key=lambda x: (x['receive_count'], x['send_count'], x['last_sent']))[:10]
+            hashes = sorted(stats, key=lambda x: (x['receive_count'], x['send_count'], x['last_sent']))[:10]
+        return [h['idx'] for h in hashes][:n]
+
+    def get_data(self, n):
+        """
+        Retrieve the data objects sorted by increasing popularity, namely in increasing receive_count, then send_count
+        and finally the last time they were sent by the current aDTN node.
+        :param n: number of objects to return
+        :return: n data objects sorted by increasing popularity
+        """
+        with self.lock:
+            hashes = self.get_hashes(n)
             now = int(time.time())
             objects = []
-            for r in res:
-                idx = r['idx']
+            for h in hashes:
                 Objects = Query()
-                obj = self.data.search(Objects.idx == idx)[0]['content']
+                obj = self.data.search(Objects.idx == h)[0]['content']
                 objects.append(obj)
-                self.stats.update({'last_sent': now}, Objects.idx == idx)
-                self.stats.update(increment('send_count'), Objects.idx == idx)
+                self.stats.update({'last_sent': now}, Objects.idx == h)
+                self.stats.update(increment('send_count'), Objects.idx == h)
         return objects[:n]
 
     def delete_data(self, object_id):

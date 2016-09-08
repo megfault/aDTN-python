@@ -7,7 +7,7 @@ def test_storage():
     ms = DataStore(db_filename="ds")
     ms.wipe()
     ms.add_object(msg)
-    retrieved_msg = ms.get_data()[0]
+    retrieved_msg = ms.get_data(1)[0]
     assert msg == retrieved_msg
     ms.wipe()
 
@@ -19,7 +19,7 @@ def test_wipe():
     l = ms.get_data(1)
     assert len(l) == 1
     ms.wipe()
-    l = ms.get_data()
+    l = ms.get_data(1)
     assert len(l) == 0
 
 
@@ -28,7 +28,7 @@ def test_creation():
     ms = DataStore(db_filename="ds")
     ms.wipe()
     ms.add_object(msg)
-    retrieved_msg = ms.get_data()[0]
+    retrieved_msg = ms.get_data(1)[0]
     assert msg == retrieved_msg
     ms.wipe()
 
@@ -41,7 +41,7 @@ def test_deletion():
     ms.add_object(msg)
     ms.delete_data(idx)
     ms.add_object(msg)
-    retrieved_msg = ms.get_data()
+    retrieved_msg = ms.get_data(2)
     assert len(retrieved_msg) == 0
     ms.wipe()
 
@@ -52,6 +52,6 @@ def test_repetion():
     ms.wipe()
     ms.add_object(msg)
     ms.add_object(msg)
-    retrieved_msg = ms.get_data()
-    assert len(retrieved_msg) == 1
+    retrieved_msgs = ms.get_data(2)
+    assert len(retrieved_msgs) == 1
     ms.wipe()
