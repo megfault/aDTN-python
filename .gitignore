@@ -3,7 +3,7 @@
 *.swo
 tests/*.log
 tests/*.json
-tests/*.key
+tests/data/keys/*.key
 .coverage
 .ropeproject/*
 .idea/*
