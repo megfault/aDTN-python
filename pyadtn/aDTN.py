@@ -68,7 +68,7 @@ class aDTN:
         generated until the sending pool is full.
         """
         if len(self._sending_pool) < self._batch_size:
-            to_send = self.data_store.get_data()[:self._batch_size]
+            to_send = self.data_store.get_data(self._batch_size)
             for message in to_send:
                 for key in self._km.keys.values():
                     packet = aDTNPacket(key=key) / aDTNInnerPacket() / message

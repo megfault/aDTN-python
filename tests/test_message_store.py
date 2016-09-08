@@ -16,7 +16,7 @@ def test_wipe():
     msg = "test"
     ms = DataStore(db_filename="ds")
     ms.add_object(msg)
-    l = ms.get_data()
+    l = ms.get_data(1)
     assert len(l) == 1
     ms.wipe()
     l = ms.get_data()

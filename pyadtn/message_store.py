@@ -60,11 +60,12 @@ class DataStore:
                 self.stats.update(increment('receive_count'), Stats.idx == idx)
                 log_debug("Data object updated: {}".format(data))
 
-    def get_data(self):
+    def get_data(self, n=1):
         """
         Retrieve the data objects sorted by increasing popularity, namely in increasing receive_count, then send_count
         and finally the last time they were sent by the current aDTN node.
-        :return: data objects sorted by increasing popularity.
+        :param n: number of objects to return, default is 1
+        :return: n data objects sorted by increasing popularity
         """
         with self.lock:
             Stats = Query()
@@ -79,7 +80,7 @@ class DataStore:
                 objects.append(obj)
                 self.stats.update({'last_sent': now}, Objects.idx == idx)
                 self.stats.update(increment('send_count'), Objects.idx == idx)
-        return objects
+        return objects[:n]
 
     def delete_data(self, object_id):
         """
