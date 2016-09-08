@@ -2,7 +2,8 @@
 *.swp
 *.swo
 tests/*.log
-test/*.json
+tests/*.json
+tests/*.key
 .coverage
 .ropeproject/*
 .idea/*
