@@ -4,6 +4,7 @@
 *.log
 tests/*.log
 tests/*.json
+tests/*.info
 tests/data/keys/*.key
 .coverage
 .ropeproject/*
