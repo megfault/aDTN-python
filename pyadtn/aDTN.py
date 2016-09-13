@@ -85,6 +85,7 @@ class aDTN:
         This function reschedules itself to occur every sending_freq seconds.
         """
         self._scheduler.enter(self._sending_freq, 1, self._send)
+        log_debug("Sending scheduler queue length: {}".format(len(self._scheduler.queue)))
         if self._sending:
             batch = []
             s = sample(self._sending_pool, self._batch_size)
