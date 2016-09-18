@@ -151,7 +151,7 @@ class aDTN:
         log_network("start-{}-{}".format(self._batch_size, self._sending_freq))
         self._thread_receive.start()
         sleep(5)
-        cProfile.run(self._thread_send.start(), filename="sending_thread.prof")
+        run(self._thread_send.start(), filename="sending_thread.prof")
 
     def stop(self):
         """
