@@ -24,7 +24,7 @@ class aDTN:
     Keys used for encrypting and decrypting the packets are stored in a KeyManager.
     Received payload is stored in a MessageStore instance.
     """
-    def __init__(self, batch_size, sending_freq, wireless_interface, data_store):
+    def __init__(self, batch_size, sending_interval, wireless_interface, data_store):
         """
         Initialize an aDTN instance and its respective key manager and message store, as well as a sending message pool
         from which the next sending batch gets generated.
@@ -38,11 +38,11 @@ class aDTN:
         The wireless interface should be previously set to ad-hoc mode and its ESSID should be the same in other devices
         running aDTN.
         :param batch_size: number of packets to transmit at each sending operation
-        :param sending_freq: number of seconds between two sending operations
+        :param sending_interval: number of seconds between two sending operations
         :param wireless_interface: wireless interface to send and receive packets
         """
         self._batch_size = batch_size
-        self._sending_freq = sending_freq
+        self._sending_freq = sending_interval
         self._wireless_interface = wireless_interface
         self._km = KeyManager()
         self.data_store = DataStore(data_store)
@@ -177,7 +177,7 @@ def parse_args():
     """
     parser = ArgumentParser(description='Run an aDTN simulation instance.')
     parser.add_argument('batch_size', type=int, help='how many messages to send in a batch')
-    parser.add_argument('sending_freq', type=float, help='interval (in s) between sending a batch')
+    parser.add_argument('sending_interval', type=float, help='interval (in s) between sending a batch')
     parser.add_argument('wireless_interface', type=str, help='name of the wireless interface')
     parser.add_argument('data_store', type=str, default=None, help="file storing the data objects")
     return parser.parse_args()
@@ -185,6 +185,6 @@ def parse_args():
 
 if __name__ == "__main__":
     args = parse_args()
-    adtn = aDTN(args.batch_size, args.sending_freq, args.wireless_interface, args.data_store)
+    adtn = aDTN(args.batch_size, args.sending_interval, args.wireless_interface, args.data_store)
     register(aDTN.stop, adtn)
     adtn.start()
