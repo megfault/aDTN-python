@@ -7,7 +7,6 @@ from argparse import ArgumentParser
 from random import sample
 from atexit import register
 from pyric.pyw import macget, getcard
-from cProfile import run
 
 from pyadtn.message_store import DataStore
 from pyadtn.key_manager import KeyManager
@@ -151,7 +150,7 @@ class aDTN:
         log_network("start-{}-{}".format(self._batch_size, self._sending_freq))
         self._thread_receive.start()
         sleep(5)
-        cProfile.run(self._thread_send.start(), filename="sending_thread.prof")
+        self._thread_send.start()
 
     def stop(self):
         """
