@@ -92,9 +92,11 @@ class aDTN:
             for pkt in s:
                 batch.append(Ether(dst="ff:ff:ff:ff:ff:ff", src=self._mac_address, type=ETHERTYPE) / pkt)
                 self._sending_pool.remove(pkt)
+            t_before = time.now()
             sendp(batch, iface=self._wireless_interface)
+            t_after = time.now()
             self._sent_pkt_counter += len(batch)
-            log_network("snt {}".format(len(batch)))
+            log_network("snt {} in {}s".format(len(batch), t_after - t_before))
             self._prepare_sending_pool()
 
     def _process(self, frame):
