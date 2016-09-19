@@ -22,5 +22,6 @@ setup(name='pyadtn',
           "scapy-python3",
           "pynacl",
           "tinydb",
+          "click",
       ]
       )
