@@ -4,6 +4,7 @@
 *.log
 tests/*.log
 tests/*.json
+tests/*.prof
 tests/data/*
 tests/data/keys/*
 .coverage
