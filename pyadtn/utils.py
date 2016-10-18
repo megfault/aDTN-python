@@ -1,9 +1,10 @@
-from binascii import hexlify, unhexlify
+from binascii import hexlify, unhexlify, crc32
 from nacl.utils import random as rand
 from nacl.secret import SecretBox
 from nacl.hash import sha256
 from nacl.encoding import HexEncoder
 from random import randint
+from pyric.pyw import macget, getcard
 import fcntl, socket, struct
 from logging import basicConfig, DEBUG, INFO, FileHandler, Formatter, getLogger
 from threading import RLock
@@ -80,6 +81,34 @@ def s2b(s):
     return unhexlify(s.encode('utf-8'))
 
 
+def hex_string_to_bytes(s):
+    """
+    Convert a string of hexadecimal characters to a byte string.
+    :param s: string of hexadecimal characters
+    :return: byte string representation of the input string
+    """
+    return b''.join(c.encode('utf-8') for c in s)
+
+
+def mac_address_to_bytes(mac_address):
+    """
+    Convert a MAC address string (e.g. 00:11:22:33:44:55) to a bytestring (e.g. b'001122334455').
+    :param mac_address string representing a MAC address in its usual colon-separated format
+    :return: byte string representation of the input macaddress
+    """
+    mac_digits = "".join(mac_address.split(":"))
+    return hex_string_to_bytes(mac_digits)
+
+
+def real_mac_address(interface):
+    """
+    Find the MAC address of the given network interface.
+    :param interface: network interace name as a string
+    :return: string representation of the corresponding MAC address in its usual colon-separated format
+    """
+    return macget(getcard(interface))
+
+
 def random_mac_address():
     """
     Generate a random MAC address
@@ -92,3 +121,20 @@ def random_mac_address():
                 s = "0" + s
             yield s
     return ":".join(generate_n_hexdigit_pairs(6))
+
+
+def calculate_fcs(bytestring):
+    fcs = crc32(bytestring)
+    return fcs
+
+
+def build_frame(dst_address, src_address, payload):
+    """
+    Builds a 1500 byte long Ethernet frame with the given fields and payload, which must be 1482 bytes long.
+    :param dst_address string containing destination mac address in its usual format
+    :param src_address string containing source mac address, in its usual format
+    :param payload layer 3 packet, exactly 1482 bytes long, as a byte string
+    """
+    header = dst_address + src_address + ETHERTYPE
+    frame_check_sequence = calculate_fcs(header + payload)
+    return header + payload + frame_check_sequence
