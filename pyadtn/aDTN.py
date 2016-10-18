@@ -7,6 +7,7 @@ from argparse import ArgumentParser
 from random import sample
 from atexit import register
 from pyric.pyw import macget, getcard
+from cProfile import Profile
 
 from pyadtn.message_store import DataStore
 from pyadtn.key_manager import KeyManager
@@ -150,7 +151,9 @@ class aDTN:
         log_network("start-{}-{}".format(self._batch_size, self._sending_freq))
         self._thread_receive.start()
         sleep(5)
-        self._thread_send.start()
+        p = Profile()
+        p.runcall(self._thread_send.start)
+        p.dump_stats("sending_thread.prof")
 
     def stop(self):
         """
@@ -181,7 +184,7 @@ def parse_args():
     parser.add_argument('batch_size', type=int, help='how many messages to send in a batch')
     parser.add_argument('sending_interval', type=float, help='interval (in s) between sending a batch')
     parser.add_argument('wireless_interface', type=str, help='name of the wireless interface')
-    parser.add_argument('data_store', type=str, default=None, help="file storing the data objects")
+    parser.add_argument('data_store', type=str, default=None, help='file storing the data objects')
     return parser.parse_args()
 
 
