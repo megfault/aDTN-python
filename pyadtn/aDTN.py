@@ -71,11 +71,14 @@ class aDTN:
             to_send = self.data_store.get_data()[:self._batch_size]
             for message in to_send:
                 for key in self._km.keys.values():
-                    packet = aDTNPacket(key=key) / aDTNInnerPacket() / message
+                    # packet = aDTNPacket(key=key) / aDTNInnerPacket() / message
+                    packet = b'0' * 1500
                     self._sending_pool.append(packet)
             while len(self._sending_pool) < self._batch_size:
                 fake_key = self._km.get_fake_key()
-                self._sending_pool.append((aDTNPacket(key=fake_key) / aDTNInnerPacket()))
+                # packet = aDTNPacket(key=fake_key) / aDTNInnerPacket()
+                packet = b'0' * 1500
+                self._sending_pool.append(packet)
 
     def _send(self):
         """
@@ -148,8 +151,8 @@ class aDTN:
         self._sending = True
         self._thread_send = Thread(target=self._scheduler.run, name="SendingThread", kwargs={"blocking": True})
         log_network("start-{}-{}".format(self._batch_size, self._sending_freq))
-        #self._thread_receive.start()
-        #sleep(5)
+        self._thread_receive.start()
+        sleep(5)
         self._thread_send.start()
 
     def stop(self):
@@ -166,7 +169,7 @@ class aDTN:
             sleep(5)
             # Now we just have to join the receiving thread to stop aDTN completely:
             self._sniffing = False
-            #self._thread_receive.join()
+            self._thread_receive.join()
             log_network("stop")
         except ValueError:  # In case the popped event started running in the meantime...
             log_debug("Scheduler is not empty, retry stopping.")
