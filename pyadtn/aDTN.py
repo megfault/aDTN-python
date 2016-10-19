@@ -71,13 +71,10 @@ class aDTN:
             to_send = self.data_store.get_data()[:self._batch_size]
             for message in to_send:
                 for key in self._km.keys.values():
-                    # packet = aDTNPacket(key=key) / aDTNInnerPacket() / message
-                    packet = b'0' * 1200
+                    packet = aDTNPacket(key=key) / aDTNInnerPacket() / message
                     self._sending_pool.append(packet)
             while len(self._sending_pool) < self._batch_size:
-                fake_key = self._km.get_fake_key()
-                # packet = aDTNPacket(key=fake_key) / aDTNInnerPacket()
-                packet = b'0' * 1200
+                packet = aDTNPacket(key=fake_key) / aDTNInnerPacket()
                 self._sending_pool.append(packet)
 
     def _send(self):
