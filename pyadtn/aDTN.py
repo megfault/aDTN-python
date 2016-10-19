@@ -74,9 +74,10 @@ class aDTN:
                     packet = aDTNPacket(key=key) / aDTNInnerPacket() / message
                     self._sending_pool.append(packet)
             while len(self._sending_pool) < self._batch_size:
+                fake_key = self._km.get_fake_key()
                 packet = aDTNPacket(key=fake_key) / aDTNInnerPacket()
                 self._sending_pool.append(packet)
-
+2
     def _send(self):
         """
         Send a batch of randomly selected packets from the sending pool, then ensure the sending pool gets refilled if
