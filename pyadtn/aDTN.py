@@ -60,6 +60,7 @@ class aDTN:
         bind_layers(aDTNPacket, aDTNInnerPacket)
         bind_layers(Ether, aDTNPacket, type=ETHERTYPE)
         log_debug("MAC address in use: {}".format(self._mac_address))
+        self._stats_file_name = '{}_{}.stats'.format(batch_size, sending_interval)
 
     def _prepare_sending_pool(self):
         """
@@ -96,6 +97,8 @@ class aDTN:
             t_before = time()
             sendp(batch, iface=self._wireless_interface, verbose=False)
             t_after = time()
+            with open(self._stats_file_name, 'a') as stats_file:
+                stats_file.write('{},{},{}\n'.format(t_before, t_after, len(batch)))
             self._sent_pkt_counter += len(batch)
             log_network("snt {} in {}s".format(len(batch), t_after - t_before))
             self._prepare_sending_pool()
