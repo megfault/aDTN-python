@@ -1,5 +1,6 @@
 from nacl.exceptions import CryptoError
-from scapy.all import Ether, sendp, sniff, bind_layers
+from scapy.all import Ether, sniff, bind_layers, L2Socket
+from scapy.sendrecv import _gen_send_repeatable
 from time import time, sleep
 import sched
 from threading import Thread
@@ -57,6 +58,7 @@ class aDTN:
         self._decrypted_pkt_counter = None
         self._start_time = None
         self._mac_address = macget(getcard(wireless_interface))
+        self._sending_socket = L2Socket(iface=self._wireless_interface)
         bind_layers(aDTNPacket, aDTNInnerPacket)
         bind_layers(Ether, aDTNPacket, type=ETHERTYPE)
         log_debug("MAC address in use: {}".format(self._mac_address))
@@ -95,7 +97,7 @@ class aDTN:
                 batch.append(Ether(dst="ff:ff:ff:ff:ff:ff", src=self._mac_address, type=ETHERTYPE) / pkt)
                 self._sending_pool.remove(pkt)
             t_before = time()
-            sendp(batch, iface=self._wireless_interface, verbose=False)
+            _gen_send_repeatable(self._sending_socket, batch, iface=self._wireless_interface, verbose=False)
             t_after = time()
             with open(self._stats_file_name, 'a') as stats_file:
                 stats_file.write('{},{},{}\n'.format(t_before, t_after, len(batch)))
