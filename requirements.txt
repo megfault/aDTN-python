@@ -1,4 +1,5 @@
-scapy-python3
+-e git+https://github.com/synnefy/scapy@master#egg=scapy-python3
 pynacl
 tinydb
 PyYAML
+pyric

@@ -18,6 +18,9 @@ setup(name='pyadtn',
           'Programming Language :: Python :: 3',
           'License :: OSI Approved :: GNU Affero General Public License v3',
       ],
+      dependency_links=[
+          "git+https://github.com/synnefy/scapy.git@master#egg=scapy-python3"
+      ],
       install_requires=[
           "scapy-python3",
           "pynacl",
